@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Mis Amigos{% endblock %}
+{% block content %}
+<h2>Mis amigos</h2>
+<ul>
+    {% for user in amigos %}
+        <li>
+            {{ user }}
+            <a href="{{ url_for('ver_perfil', username=user) }}">Ver perfil</a>
+            <a href="{{ url_for('eliminar_amigo', username=user) }}" class="btn btn-danger btn-sm">Eliminar amigo</a>
+        </li>
+    {% else %}
+        <li>No tienes amigos aún.</li>
+    {% endfor %}
+</ul>
+{% endblock %}
+

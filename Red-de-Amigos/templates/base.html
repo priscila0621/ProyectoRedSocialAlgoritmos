@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Red Social{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Google Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:600,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        .navbar {
+            background: linear-gradient(90deg, #4f8cff 0%, #235390 100%);
+            color: #fff;
+            padding: 0.7rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            font-family: 'Montserrat', Arial, sans-serif;
+        }
+        .navbar-logo {
+            font-weight: bold;
+            font-size: 1.7rem;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .navbar-links {
+            list-style: none;
+            display: flex;
+            gap: 1.2rem;
+            margin: 0;
+            padding: 0;
+            align-items: center;
+        }
+        .navbar-links li {
+            display: inline;
+        }
+        .navbar-links a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 0.8rem;
+            border-radius: 4px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .navbar-links a:hover {
+            background: rgba(255,255,255,0.18);
+        }
+        .navbar-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #fff;
+            margin-left: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        @media (max-width: 700px) {
+            .navbar-links { gap: 0.5rem; }
+            .navbar-logo { font-size: 1.1rem; }
+            .navbar-avatar { width: 28px; height: 28px; }
+        }
+        .alert {
+            padding: 0.8rem 1.2rem;
+            border-radius: 6px;
+            margin-bottom: 1.2rem;
+            font-size: 1rem;
+        }
+        .alert-success { background: #e6f9e6; color: #257a3e; }
+        .alert-danger { background: #ffeaea; color: #a33a3a; }
+        .alert-info { background: #eaf4ff; color: #235390; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-logo">
+            <i class="fa-solid fa-users"></i> RedSocial
+        </div>
+        <ul class="navbar-links">
+            <li><a href="{{ url_for('feed') }}"><i class="fa-solid fa-house"></i>Inicio</a></li>
+            <li><a href="{{ url_for('usuarios') }}"><i class="fa-solid fa-users"></i>Usuarios</a></li>
+            <li><a href="{{ url_for('perfil') }}"><i class="fa-solid fa-user"></i>Perfil</a></li>
+            <li><a href="{{ url_for('buscar') }}"><i class="fa-solid fa-magnifying-glass"></i>Buscar</a></li>
+            <li><a href="{{ url_for('solicitudes') }}"><i class="fa-solid fa-envelope"></i>Solicitudes</a></li>
+            <li><a href="{{ url_for('amigos') }}"><i class="fa-solid fa-heart"></i>Amigos</a></li>
+            <li><a href="{{ url_for('logout') }}"><i class="fa-solid fa-right-from-bracket"></i>Salir</a></li>
+            {% if session.get('username') %}
+                {% set usuario = red.obtener_usuario(session['username']) %}
+                <li>
+                    <img src="{{ url_for('static', filename='avatars/' ~ (usuario.avatar if usuario.avatar else 'default.png')) }}" class="navbar-avatar" alt="avatar">
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

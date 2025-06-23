@@ -1,0 +1,17 @@
+/* Estilos generales para la aplicación */
+body {
+    font-family: Arial, sans-serif;
+    background: #f0f0f5;
+    padding: 20px;
+}
+input, button {
+    margin: 5px;
+    padding: 8px;
+    font-size: 14px;
+}
+form {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+}

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Buscar Usuarios</title>
+    <link rel="stylesheet" href="/static/css/estilo.css">
+</head>
+<body>
+    {% extends 'base.html' %}
+    {% block title %}Buscar Usuarios{% endblock %}
+    {% block content %}
+    <h2>Buscar usuarios</h2>
+    <form method="POST">
+        <input name="query" placeholder="Nombre de usuario">
+        <button type="submit">Buscar</button>
+    </form>
+    <ul>
+        {% for user in resultados %}
+            <li>
+                <a href="{{ url_for('ver_perfil', username=user) }}">{{ user }}</a>
+                <a href="{{ url_for('enviar_solicitud', username=user) }}" class="btn btn-success btn-sm">Agregar amigo</a>
+            </li>
+        {% endfor %}
+    </ul>
+    {% endblock %}
+</body>
+</html>

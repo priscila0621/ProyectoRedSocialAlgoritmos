@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Solicitudes de amistad</title>
+    <link rel="stylesheet" href="/static/css/estilo.css">
+</head>
+<body>
+    {% extends 'base.html' %}
+    {% block title %}Solicitudes de amistad{% endblock %}
+    {% block content %}
+    <h2>Solicitudes de amistad recibidas</h2>
+    <ul>
+        {% for user in solicitudes %}
+            <li>
+                {{ user }}
+                <a href="{{ url_for('aceptar_solicitud', username=user) }}">Aceptar</a>
+                <a href="{{ url_for('rechazar_solicitud', username=user) }}">Rechazar</a>
+            </li>
+        {% else %}
+            <li>No tienes solicitudes pendientes.</li>
+        {% endfor %}
+    </ul>
+    {% endblock %}
+</body>
+</html>

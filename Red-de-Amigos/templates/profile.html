@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Perfil</title>
+    <link rel="stylesheet" href="/static/css/estilo.css">
+    <style>
+        /* Estilos para el contenedor del perfil */
+        .profile-container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 8px #ccc;
+        }
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .profile-data {
+            margin-top: 20px;
+        }
+        .profile-data p {
+            margin: 8px 0;
+        }
+        .interests-list {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+        .edit-btn {
+            background: #007bff;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .edit-btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    {% include 'navbar.html' %}
+    {% extends 'base.html' %}
+    {% block title %}Perfil{% endblock %}
+    {% block content %}
+    <div class="profile-container">
+        <div class="profile-header">
+            <!-- Muestra el nombre de usuario y el botón para editar perfil -->
+            <h2>Perfil de {{ usuario.username }}</h2>
+            {% if not externo %}
+            <a href="{{ url_for('editar_perfil') }}" class="edit-btn">Editar perfil</a>
+            {% endif %}
+        </div>
+        <div class="profile-data">
+            <!-- Muestra los datos personales según la privacidad -->
+            <p>Nombre: {{ usuario.datos_personales.nombre }}</p>
+            <p>Edad: {{ usuario.datos_personales.edad }}</p>
+            <h4>Intereses:</h4>
+            <ul class="interests-list">
+                <!-- Lista los intereses del usuario -->
+                {% for interes, detalle in usuario.intereses.items() %}
+                    <li><strong>{{ interes|capitalize }}:</strong> {{ detalle }}</li>
+                {% else %}
+                    <li class="list-group-item text-muted">Sin intereses registrados.</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% if not externo %}
+        <!-- Muestra recomendaciones de amistad -->
+        <h3>Recomendaciones de amistad</h3>
+        <ul>
+            {% for recomendado in recomendados %}
+                <li>{{ recomendado }}</li>
+            {% else %}
+                <li class="list-group-item text-muted">Sin recomendaciones por ahora.</li>
+            {% endfor %}
+        </ul>
+        <!-- Botón para cerrar sesión -->
+        <a href="{{ url_for('logout') }}" class="edit-btn" style="background:#dc3545;">Cerrar sesión</a>
+        {% else %}
+            {% if not es_amigo %}
+                <a href="{{ url_for('enviar_solicitud', username=usuario.username) }}" class="edit-btn">Agregar amigo</a>
+            {% else %}
+                <span class="edit-btn" style="background: #28a745;">Ya son amigos</span>
+            {% endif %}
+        {% endif %}
+    </div>
+    {% endblock %}
+</body>
+</html>

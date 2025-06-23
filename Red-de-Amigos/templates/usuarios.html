@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Buscar Usuarios{% endblock %}
+{% block content %}
+<h2>Buscar usuarios</h2>
+<form method="POST">
+    <input name="query" placeholder="Nombre de usuario">
+    <button type="submit">Buscar</button>
+</form>
+<ul>
+    {% for user in resultados %}
+    <li>
+        {{ user }}
+        <a href="{{ url_for('ver_perfil', username=user) }}">Ver perfil</a>
+        {% if user in amigos %}
+            <span>Ya son amigos</span>
+            <a href="{{ url_for('eliminar_amigo', username=user) }}" class="btn btn-danger btn-sm">Eliminar amigo</a>
+        {% else %}
+            <a href="{{ url_for('enviar_solicitud', username=user) }}" class="btn btn-success btn-sm">Agregar amigo</a>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        if red.autenticar_usuario(username, password):
+            session['username'] = username
+            return redirect(url_for('feed'))
+        else:
+            flash("Usuario o contraseña incorrectos", "danger")
+    return render_template('login.html')
+
+@app.route('/buscar', methods=['GET', 'POST'])
+def buscar():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    resultados = []
+    amigos = list(red.grafo.neighbors(session['username']))
+    if request.method == 'POST':
+        query = request.form['query'].lower()
+        resultados = [u for u in red.listar_usuarios() if query in u.lower() and u != session['username']]
+    else:
+        resultados = [u for u in red.listar_usuarios() if u != session['username']]
+    return render_template('usuarios.html', resultados=resultados, amigos=amigos)
+
+@app.route('/eliminar_amigo/<username>')
+def eliminar_amigo(username):
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    red.grafo.remove_edge(session['username'], username)
+    red.guardar_datos()
+    flash("Amigo eliminado.", "success")
+    return redirect(url_for('buscar'))

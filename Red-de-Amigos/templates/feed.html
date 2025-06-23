@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Inicio{% endblock %}
+{% block content %}
+<div class="text-center">
+    <h2 class="mb-4">¡Bienvenido a tu red social!</h2>
+    <p>Aquí aparecerán las publicaciones de tus amigos y las tuyas.</p>
+    <a href="{{ url_for('perfil') }}" class="btn btn-primary">Ir a mi perfil</a>
+</div>
+{% endblock %}

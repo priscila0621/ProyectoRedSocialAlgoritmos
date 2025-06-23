@@ -1,0 +1,103 @@
+{
+    "usuarios": {
+        "Priscila12": {
+            "username": "Priscila12",
+            "password_hash": "$2b$12$G9PTWTCxwIjCfwCrdlX/Huf7w2R4rV3X9SF2eODFpC49c94vXnGQa",
+            "datos_personales": {
+                "nombre": "Priscila",
+                "edad": "19"
+            },
+            "intereses": {
+                "musica": "Pop",
+                "moda": ""
+            },
+            "privacidad": {
+                "nombre": false,
+                "edad": true
+            },
+            "solicitudes_enviadas": [
+                "Emmita123",
+                "Jeyni123"
+            ],
+            "solicitudes_recibidas": [
+                "Jeyni123",
+                "Ivan123"
+            ],
+            "avatar": "Priscila12_avatar.jpg"
+        },
+        "Emmita123": {
+            "username": "Emmita123",
+            "password_hash": "$2b$12$I8JEzcaV7l4TVaztnIVdieqdxUqVBTyDRdNUnO2hzbDV2HmsbMNfu",
+            "datos_personales": {
+                "nombre": "Emma",
+                "edad": "18"
+            },
+            "intereses": {
+                "musica": "Pop",
+                "tecnologia": "",
+                "moda": "",
+                "animales": ""
+            },
+            "privacidad": {
+                "nombre": false,
+                "edad": true
+            },
+            "solicitudes_enviadas": [],
+            "solicitudes_recibidas": [
+                "Priscila12"
+            ],
+            "avatar": "default.png"
+        },
+        "Jeyni123": {
+            "username": "Jeyni123",
+            "password_hash": "$2b$12$BWt1EVVTe4Ju/Ty4Ee7yG.fIKyp03h/WE9nkUdgrzIkxzwsswjCdu",
+            "datos_personales": {
+                "nombre": "Jeyni",
+                "edad": "19"
+            },
+            "intereses": {
+                "musica": "",
+                "moda": ""
+            },
+            "privacidad": {
+                "nombre": false,
+                "edad": false
+            },
+            "solicitudes_enviadas": [
+                "Priscila12"
+            ],
+            "solicitudes_recibidas": [
+                "Priscila12"
+            ],
+            "avatar": "default.png"
+        },
+        "Ivan123": {
+            "username": "Ivan123",
+            "password_hash": "$2b$12$kZlpx8Rli0zMTiQ9ZufjS.xjdsxZ0iW1wuYC73ai3anF7.vTZY.U2",
+            "datos_personales": {
+                "nombre": "Iv\u00e1n",
+                "edad": "70"
+            },
+            "intereses": {
+                "musica": "",
+                "libros": "",
+                "animales": ""
+            },
+            "privacidad": {
+                "nombre": false,
+                "edad": true
+            },
+            "solicitudes_enviadas": [
+                "Priscila12"
+            ],
+            "solicitudes_recibidas": [],
+            "avatar": "Ivan123_avatar.png"
+        }
+    },
+    "amistades": [
+        [
+            "Priscila12",
+            "Jeyni123"
+        ]
+    ]
+}

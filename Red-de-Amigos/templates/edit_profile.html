@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Editar Perfil{% endblock %}
+{% block content %}
+<div class="edit-container">
+    <h2>Editar Perfil</h2>
+    <!-- Formulario para editar datos personales e intereses -->
+    <form method="POST" enctype="multipart/form-data">
+        <label>Nombre:</label>
+        <input name="nombre" value="{{ usuario.datos_personales.nombre }}" required><br>
+        <label>Edad:</label>
+        <input name="edad" value="{{ usuario.datos_personales.edad }}" required><br>
+        <h4>Intereses:</h4>
+        <!-- Lista de intereses con detalles -->
+        {% for cat in categorias %}
+            <input type="checkbox" name="{{cat}}" {% if cat in usuario.intereses %}checked{% endif %}> {{cat}}
+            <input name="detalle_{{cat}}" placeholder="Detalles sobre {{cat}}" value="{{ usuario.intereses[cat] if cat in usuario.intereses else '' }}"><br>
+        {% endfor %}
+        <!-- Opciones de privacidad -->
+        <label><input type="checkbox" name="privacidad_nombre" {% if usuario.privacidad.nombre %}checked{% endif %}> Privado nombre</label><br>
+        <label><input type="checkbox" name="privacidad_edad" {% if usuario.privacidad.edad %}checked{% endif %}> Privado edad</label><br>
+        <hr>
+        <label for="avatar">Foto de perfil (avatar):</label>
+        <input type="file" name="avatar" id="avatar" accept="image/*"><br>
+        {% if usuario.avatar %}
+            <div style="margin:10px 0;">
+                <img src="{{ url_for('static', filename='avatars/' ~ usuario.avatar) }}" alt="Avatar actual" style="width:80px;border-radius:50%;box-shadow:0 2px 8px #ccc;">
+            </div>
+        {% endif %}
+        <button type="submit" class="save-btn">Guardar cambios</button>
+    </form>
+    <!-- Enlace para volver al perfil -->
+    <a href="{{ url_for('perfil') }}">Volver al perfil</a>
+</div>
+<style>
+    .edit-container {
+        max-width: 600px;
+        margin: auto;
+        background: #fff;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 2px 8px #ccc;
+    }
+    .save-btn {
+        background: #28a745;
+        color: #fff;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+    .save-btn:hover {
+        background: #218838;
+    }
+</style>
+{% endblock %}

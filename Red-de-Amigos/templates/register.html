@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Registro</title>
+    <link rel="stylesheet" href="/static/css/estilo.css">
+</head>
+<body>
+    {% extends 'base.html' %}
+    {% block title %}Registro{% endblock %}
+    {% block content %}
+    <h2>Registro</h2>
+    <!-- Formulario de registro de usuario -->
+    <form method="POST">
+        <input name="username" placeholder="Usuario" required><br>
+        <input name="password" type="password" placeholder="Contraseña" required><br>
+        <input name="nombre" placeholder="Nombre" required><br>
+        <input name="edad" placeholder="Edad" required><br>
+
+        <p>Selecciona tus intereses:</p>
+        <!-- Lista de intereses con detalles opcionales -->
+        {% for cat in ["musica", "libros", "videojuegos", "deportes", "peliculas", "arte",
+                       "ciencia", "historia", "tecnologia", "moda", "viajes", "comida", "animales", "naturaleza", "otros"] %}
+            <input type="checkbox" name="{{cat}}"> {{cat}}
+            <input name="detalle_{{cat}}" placeholder="Detalles sobre {{cat}}"><br>
+        {% endfor %}
+
+        <!-- Opciones de privacidad -->
+        <label><input type="checkbox" name="privacidad_nombre"> Privado nombre</label><br>
+        <label><input type="checkbox" name="privacidad_edad"> Privado edad</label><br>
+
+        <button type="submit">Registrar</button>
+    </form>
+    {% endblock %}
+</body>
+</html>
