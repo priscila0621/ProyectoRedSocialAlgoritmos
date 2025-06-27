@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Perfil de {{ usuario.username }}{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <img src="{{ url_for('static', filename='avatars/' + (usuario.avatar or 'default.png')) }}" alt="Avatar" class="profile-avatar">
+        <div class="profile-username">{{ usuario.username }}</div>
+    </div>
+    <div class="profile-info">
+        <b>Datos personales:</b> {{ usuario.datos_personales }}<br>
+        <b>Intereses:</b> {{ usuario.intereses }}
+    </div>
+    <div class="profile-section-title">Fotos</div>
+    <div class="photos-grid">
+        {% for foto in usuario.fotos %}
+            <div class="photo-card">
+                <img src="{{ url_for('static', filename='fotos/' + foto.filename) }}" class="photo-img" alt="Foto de {{ usuario.username }}">
+                <div class="photo-desc">{{ foto.descripcion }}</div>
+            </div>
+        {% else %}
+            <p style="color:#888;">Este usuario no ha subido fotos aún.</p>
+        {% endfor %}
+    </div>
+    <a class="back-link" href="{{ url_for('amigos') }}">← Volver a amigos</a>
+</div>
+<img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Entrelazados" style="height:200px;margin-bottom:12px;">
+{% endblock %}

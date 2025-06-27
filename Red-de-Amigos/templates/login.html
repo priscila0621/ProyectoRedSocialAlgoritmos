@@ -1,19 +1,51 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{% block title %}Iniciar Sesión{% endblock %}</title>
-    <link rel="stylesheet" href="/static/css/estilo.css">
-</head>
-<body>
-    {% block content %}
-    <h2>Iniciar Sesión</h2>
-    <!-- Formulario de inicio de sesión -->
-    <form method="POST">
-        <label>Usuario:</label><input type="text" name="username"><br>
-        <label>Contraseña:</label><input type="password" name="password"><br>
-        <button type="submit">Entrar</button>
+{% extends 'base.html' %}
+{% block title %}Iniciar sesión{% endblock %}
+
+{% block content %}
+<div class="login-container" style="max-width:400px;margin:40px auto;background:#fcfafa;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.10);padding:32px 28px;">
+    <div style="text-align:center;margin-bottom:28px;">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Entrelazados" style="height:100px;margin-bottom:12px;">
+        <div style="font-size:2.1rem;font-weight:bold;color:#235390;letter-spacing:1px;">
+            Entrelazados
+        </div>
+        <div style="color:#888;font-size:1.1rem;margin-top:2px;">Red social de conexiones auténticas</div>
+    </div>
+    <h2 style="text-align:center;color:#235390;margin-bottom:24px;font-size:1.3rem;">Inicia sesión</h2>
+    <form method="post">
+        <div style="margin-bottom:18px;">
+            <label for="username" style="font-weight:600;">Usuario</label>
+            <input type="text" name="username" id="username" class="form-control" required autocomplete="off" value="{{ username or '' }}" style="width:100%;padding:8px;margin-top:4px;border-radius:6px;border:1px solid #ccc;">
+        </div>
+        <div style="margin-bottom:18px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+                <label for="password" style="font-weight:600;flex:1;">Contraseña</label>
+                <button type="button" onclick="togglePassword('password', this)" style="background:none;border:none;cursor:pointer;padding:0 4px;">
+                    <span id="icon-password">👁️</span>
+                </button>
+            </div>
+            <input type="password" name="password" id="password" class="form-control" required autocomplete="off"
+                value="{{ request.form.password or '' }}"
+                style="width:100%;padding:8px;margin-top:4px;border-radius:6px;border:1px solid #ccc;">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;padding:10px 0;font-size:1.1rem;">Entrar</button>
     </form>
-    <p>¿No tienes cuenta? <a href="{{ url_for('registro') }}">Regístrate aquí</a></p>
-    {% endblock %}
-</body>
-</html>
+    <div style="margin-top:18px;text-align:center;">
+        <a href="{{ url_for('registro') }}" style="color:#0095f6;">¿No tienes cuenta? Regístrate</a><br>
+        <a href="{{ url_for('recuperar_contrasena') }}" style="color:#888;">¿Olvidaste tu contraseña?</a>
+    </div>
+</div>
+
+<script>
+function togglePassword(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('span');
+    if (input.type === "password") {
+        input.type = "text";
+        icon.textContent = "🙈";
+    } else {
+        input.type = "password";
+        icon.textContent = "👁️";
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Recuperar contraseña{% endblock %}
+{% block content %}
+<div class="login-container">
+    <h2 style="text-align:center;color:#235390;margin-bottom:24px;">Recuperar contraseña</h2>
+    <form method="post">
+        <div style="margin-bottom:18px;">
+            <label for="email" style="font-weight:600;">Correo electrónico</label>
+            <input type="email" name="email" id="email" class="form-control" required style="width:100%;padding:8px;margin-top:4px;border-radius:6px;border:1px solid #ccc;">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;padding:10px 0;font-size:1.1rem;">Enviar enlace de recuperación</button>
+    </form>
+    <div style="margin-top:18px;text-align:center;">
+        <a href="{{ url_for('login') }}" style="color:#0095f6;">Volver a iniciar sesión</a>
+    </div>
+</div>
+{% endblock %}

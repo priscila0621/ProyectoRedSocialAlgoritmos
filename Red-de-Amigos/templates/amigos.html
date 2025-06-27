@@ -1,17 +1,95 @@
 {% extends 'base.html' %}
-{% block title %}Mis Amigos{% endblock %}
+{% block title %}Mis amigos{% endblock %}
+
 {% block content %}
-<h2>Mis amigos</h2>
-<ul>
-    {% for user in amigos %}
-        <li>
-            {{ user }}
-            <a href="{{ url_for('ver_perfil', username=user) }}">Ver perfil</a>
-            <a href="{{ url_for('eliminar_amigo', username=user) }}" class="btn btn-danger btn-sm">Eliminar amigo</a>
-        </li>
+<h2 style="margin-bottom:24px;">Mis amigos</h2>
+<div class="amigos-lista">
+    {% for amigo in amigos %}
+    <div class="amigo-card">
+        <img src="{{ url_for('static', filename='avatars/' ~ (amigo.avatar if amigo.avatar else 'default.png')) }}"
+             alt="Avatar"
+             class="amigo-avatar">
+        <div class="amigo-info">
+            <div class="amigo-nombre">{{ amigo.datos_personales.nombre }}</div>
+            <div class="amigo-username">@{{ amigo.username }}</div>
+            <div class="amigo-acciones">
+                <a href="{{ url_for('ver_perfil', username=amigo.username) }}" class="btn btn-outline-secondary btn-sm">Ver perfil</a>
+                <a href="{{ url_for('enviar_mensaje', username=amigo.username) }}" class="btn btn-primary btn-sm" style="background:#6c63ff;border:none;">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </a>
+            </div>
+        </div>
+    </div>
     {% else %}
-        <li>No tienes amigos aún.</li>
+    <div style="color:#888;">No tienes amigos aún.</div>
     {% endfor %}
-</ul>
+</div>
 {% endblock %}
 
+{% block style %}
+<style>
+.amigos-lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-bottom: 32px;
+    justify-content: flex-start;
+}
+.amigo-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px #e0e0e0;
+    padding: 12px 16px;
+    width: 320px;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    transition: box-shadow 0.2s;
+    gap: 16px;
+}
+.amigo-card:hover {
+    box-shadow: 0 4px 16px #b0b0b0;
+}
+.amigo-avatar {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: #e0e0e0;
+    object-fit: cover;
+    box-shadow: 0 1px 4px #bbb;
+    flex-shrink: 0;
+}
+.amigo-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+.amigo-nombre {
+    font-weight: bold;
+    color: #235390;
+    font-size: 1.08em;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.amigo-username {
+    font-size: 0.97rem;
+    color: #666;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.amigo-acciones {
+    display: flex;
+    gap: 8px;
+}
+.btn-sm {
+    padding: 4px 10px;
+    font-size: 0.97em;
+    border-radius: 5px;
+}
+</style>
+{% endblock %}

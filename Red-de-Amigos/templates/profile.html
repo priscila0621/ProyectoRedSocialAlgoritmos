@@ -88,6 +88,22 @@
                 <span class="edit-btn" style="background: #28a745;">Ya son amigos</span>
             {% endif %}
         {% endif %}
+        <a href="{{ url_for('subir_foto') }}">Subir nueva foto</a>
+        <!-- Galería de fotos del usuario -->
+        <h3>Galería de fotos</h3>
+        <div class="gallery">
+            {% for foto in usuario.fotos %}
+                <div class="photo-item">
+                    <img src="{{ url_for('static', filename='fotos/' + foto.filename) }}" alt="Foto de {{ usuario.username }}" class="photo" width="300">
+                    <!-- Formulario para eliminar foto -->
+                    <form action="{{ url_for('eliminar_foto', filename=foto.filename) }}" method="post" style="display:inline;">
+                        <button type="submit" onclick="return confirm('¿Seguro que quieres eliminar esta foto?')">Eliminar</button>
+                    </form>
+                </div>
+            {% else %}
+                <p class="text-muted">Sin fotos en la galería.</p>
+            {% endfor %}
+        </div>
     </div>
     {% endblock %}
 </body>

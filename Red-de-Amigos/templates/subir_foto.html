@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Subir Foto</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            background: #fff;
+            max-width: 400px;
+            margin: 60px auto;
+            padding: 32px 28px 24px 28px;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 28px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        input[type="file"], input[type="text"] {
+            width: 100%;
+            padding: 8px 10px;
+            margin-bottom: 18px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+        button {
+            width: 100%;
+            background: #0095f6;
+            color: #fff;
+            border: none;
+            padding: 12px 0;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #0077c2;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 18px;
+            color: #0095f6;
+            text-decoration: none;
+            font-size: 15px;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Subir Foto</h1>
+        <form method="post" enctype="multipart/form-data">
+            <label for="foto">Selecciona una foto:</label>
+            <input type="file" name="foto" id="foto" required>
+
+            <label for="descripcion">Descripción:</label>
+            <input type="text" name="descripcion" id="descripcion" maxlength="200" placeholder="Agrega una descripción...">
+
+            <button type="submit">Subir</button>
+        </form>
+        <a class="back-link" href="{{ url_for('feed') }}">← Volver al feed</a>
+    </div>
+</body>
+</html>

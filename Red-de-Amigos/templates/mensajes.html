@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Mensajes con {{ otro.username }}{% endblock %}
+{% block content %}
+<h2>Conversación con {{ otro.username }}</h2>
+<div style="max-width:600px;margin:auto;">
+    <div style="background:#f4f6fb;padding:16px;border-radius:8px;min-height:200px;">
+        {% for mensaje in conversacion %}
+            <div style="margin-bottom:10px;">
+                <b>{{ mensaje.emisor }}:</b> {{ mensaje.texto }}
+                <span style="color:#888;font-size:0.9em;">{{ mensaje.fecha }}</span>
+            </div>
+        {% else %}
+            <div style="color:#888;">No hay mensajes aún.</div>
+        {% endfor %}
+    </div>
+    <form method="post" style="margin-top:16px;display:flex;gap:8px;">
+        <input type="text" name="mensaje" placeholder="Escribe un mensaje..." required style="flex:1;padding:8px;">
+        <button type="submit" style="padding:8px 16px;">Enviar</button>
+    </form>
+    <a href="{{ url_for('amigos') }}">← Volver a amigos</a>
+</div>
+{% endblock %}

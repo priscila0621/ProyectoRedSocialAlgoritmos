@@ -6,4 +6,24 @@
     <p>Aquí aparecerán las publicaciones de tus amigos y las tuyas.</p>
     <a href="{{ url_for('perfil') }}" class="btn btn-primary">Ir a mi perfil</a>
 </div>
+<h1>Feed de Fotos</h1>
+{% for foto in fotos %}
+  <div style="margin-bottom: 32px;">
+    <img src="{{ url_for('static', filename='fotos/' + foto.filename) }}" width="300">
+    <p>{{ foto.descripcion }}</p>
+    <p>Autor: {{ foto.autor }}</p>
+    <form action="{{ url_for('comentar_foto', autor=foto.autor, filename=foto.filename) }}" method="post" style="margin-bottom: 8px;">
+      <input type="text" name="comentario" placeholder="Comenta algo..." required>
+      <button type="submit">Comentar</button>
+    </form>
+    <form action="{{ url_for('like_foto', autor=foto.autor, filename=foto.filename) }}" method="get" style="display:inline;">
+      <button type="submit">Me gusta ({{ foto.likes|length }})</button>
+    </form>
+    <ul>
+      {% for comentario in foto.comentarios %}
+        <li><b>{{ comentario.usuario }}:</b> {{ comentario.texto }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endfor %}
 {% endblock %}

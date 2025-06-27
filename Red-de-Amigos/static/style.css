@@ -53,3 +53,200 @@ body {
     padding: 2rem;
     box-shadow: 0 2px 16px rgba(0,0,0,0.06);
 }
+
+/* --- Estilos para ver_perfil.html --- */
+.profile-container {
+    max-width: 500px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    padding: 32px 28px 24px 28px;
+}
+.profile-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+.profile-avatar {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #0095f6;
+    margin-bottom: 12px;
+    background: #eee;
+}
+.profile-username {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #222;
+    margin-bottom: 8px;
+}
+.profile-info {
+    color: #444;
+    margin-bottom: 18px;
+    font-size: 1.05rem;
+}
+.profile-section-title {
+    font-size: 1.2rem;
+    color: #0095f6;
+    margin-bottom: 10px;
+    margin-top: 24px;
+    font-weight: 600;
+}
+.photos-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    justify-content: center;
+    margin-bottom: 18px;
+}
+.photo-card {
+    background: #fafafa;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    padding: 10px;
+    width: 200px;
+    text-align: center;
+}
+.photo-img {
+    width: 180px;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background: #e0e0e0;
+}
+.photo-desc {
+    font-size: 0.98rem;
+    color: #333;
+    margin-bottom: 6px;
+}
+.back-link {
+    display: block;
+    text-align: center;
+    margin-top: 18px;
+    color: #0095f6;
+    text-decoration: none;
+    font-size: 15px;
+}
+.back-link:hover {
+    text-decoration: underline;
+}
+
+.login-container {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    padding: 32px 28px;
+    max-width: 400px;
+    margin: 40px auto;
+}
+.btn-primary {
+    background: #235390;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 0;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.btn-primary:hover {
+    background: #18305c;
+}
+.btn-outline-secondary {
+    background: #f4f6fb;
+    color: #235390;
+    border: 1px solid #235390;
+    border-radius: 6px;
+    padding: 8px 0;
+    width: 100%;
+    margin-bottom: 8px;
+    text-decoration: none;
+    display: inline-block;
+    transition: background 0.2s, color 0.2s;
+    margin-right: 6px;
+}
+.btn-outline-secondary:hover {
+    background: #235390;
+    color: #fff;
+}
+.usuario-card {
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+/* --- Estilos para la sección de usuarios y recomendaciones --- */
+.usuarios-container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    padding: 32px 28px;
+}
+.usuarios-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+.usuarios-header img {
+    height: 38px;
+    vertical-align: middle;
+    margin-right: 10px;
+}
+.usuarios-header-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #235390;
+}
+.usuarios-busqueda {
+    margin-bottom: 24px;
+    display: flex;
+    gap: 12px;
+}
+.usuarios-busqueda input,
+.usuarios-busqueda select {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+.recomendaciones-titulo {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #0095f6;
+    margin-bottom: 10px;
+}
+.usuarios-titulo {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #235390;
+    margin-bottom: 10px;
+}
+.recomendaciones-lista,
+.usuarios-lista {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+.usuario-card {
+    background: #f4f6fb;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    padding: 16px;
+    width: 220px;
+    text-align: center;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+.usuario-card img {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: #e0e0e0;
+    margin-bottom: 8px;
+}
+.usuario-card .btn {
+    margin-top: 8px;
+    width: 90%;
+}

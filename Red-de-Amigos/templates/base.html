@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Red Social{% endblock %}</title>
+    <title>{% block title %}Entrelazados{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <!-- Google Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css?family=Montserrat:600,400&display=swap" rel="stylesheet">
@@ -75,11 +75,15 @@
         .alert-danger { background: #ffeaea; color: #a33a3a; }
         .alert-info { background: #eaf4ff; color: #235390; }
     </style>
+    {% block head %}{% endblock %}
+    {% block style %}{% endblock %}
 </head>
 <body>
+    {% if not ocultar_nav %}
     <nav class="navbar">
         <div class="navbar-logo">
-            <i class="fa-solid fa-users"></i> RedSocial
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Entrelazados" style="height:32px;vertical-align:middle;margin-right:8px;">
+            <span style="font-weight:bold;">Entrelazados</span>
         </div>
         <ul class="navbar-links">
             <li><a href="{{ url_for('feed') }}"><i class="fa-solid fa-house"></i>Inicio</a></li>
@@ -90,13 +94,14 @@
             <li><a href="{{ url_for('amigos') }}"><i class="fa-solid fa-heart"></i>Amigos</a></li>
             <li><a href="{{ url_for('logout') }}"><i class="fa-solid fa-right-from-bracket"></i>Salir</a></li>
             {% if session.get('username') %}
-                {% set usuario = red.obtener_usuario(session['username']) %}
+                {% set usuario_nav = red.obtener_usuario(session['username']) %}
                 <li>
-                    <img src="{{ url_for('static', filename='avatars/' ~ (usuario.avatar if usuario.avatar else 'default.png')) }}" class="navbar-avatar" alt="avatar">
+                    <img src="{{ url_for('static', filename='avatars/' ~ (usuario_nav.avatar if usuario_nav.avatar else 'default.png')) }}" class="navbar-avatar" alt="avatar">
                 </li>
             {% endif %}
         </ul>
     </nav>
+    {% endif %}
     <div class="container">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}

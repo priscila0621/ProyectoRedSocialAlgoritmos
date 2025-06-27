@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Recuperar contraseña{% endblock %}
+
+{% block content %}
+<div class="login-container" style="max-width:400px;margin:40px auto;background:#fcfafa;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.10);padding:32px 28px;">
+    <h2 style="text-align:center;color:#235390;margin-bottom:24px;font-size:1.3rem;">Recuperar contraseña</h2>
+    <form method="post">
+        <div style="margin-bottom:18px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+                <label for="nueva_contrasena" style="font-weight:600;flex:1;">Nueva contraseña</label>
+                <button type="button" onclick="togglePassword('nueva_contrasena', this)" style="background:none;border:none;cursor:pointer;padding:0 4px;">
+                    <span>👁️</span>
+                </button>
+            </div>
+            <input type="password" name="nueva_contrasena" id="nueva_contrasena" class="form-control" required style="width:100%;padding:8px;margin-top:4px;border-radius:6px;border:1px solid #ccc;">
+        </div>
+        <div style="margin-bottom:18px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+                <label for="confirmar_contrasena" style="font-weight:600;flex:1;">Confirmar contraseña</label>
+                <button type="button" onclick="togglePassword('confirmar_contrasena', this)" style="background:none;border:none;cursor:pointer;padding:0 4px;">
+                    <span>👁️</span>
+                </button>
+            </div>
+            <input type="password" name="confirmar_contrasena" id="confirmar_contrasena" class="form-control" required style="width:100%;padding:8px;margin-top:4px;border-radius:6px;border:1px solid #ccc;">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;padding:10px 0;font-size:1.1rem;">Restablecer contraseña</button>
+    </form>
+</div>
+
+<script>
+function togglePassword(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('span');
+    if (input.type === "password") {
+        input.type = "text";
+        icon.textContent = "🙈";
+    } else {
+        input.type = "password";
+        icon.textContent = "👁️";
+    }
+}
+</script>
+{% endblock %}

@@ -3,18 +3,52 @@ import bcrypt
 import json
 import os
 from datetime import datetime
+from itsdangerous import URLSafeTimedSerializer
+
+class Foto:
+    def __init__(self, filename, descripcion, autor, comentarios=None, likes=None):
+        self.filename = filename
+        self.descripcion = descripcion
+        self.autor = autor
+        self.comentarios = comentarios or []  # Ahora será lista de dicts
+        self.likes = set(likes) if likes else set()  # conjunto de usernames
+
+    def to_dict(self):
+        return {
+            "filename": self.filename,
+            "descripcion": self.descripcion,
+            "autor": self.autor,
+            "comentarios": self.comentarios,
+            "likes": list(self.likes)
+        }
+
+    @staticmethod
+    def from_dict(data):
+        return Foto(
+            data["filename"],
+            data["descripcion"],
+            data["autor"],
+            data.get("comentarios", []),
+            data.get("likes", [])
+        )
 
 class Usuario:
-    def __init__(self, username, password, datos_personales, intereses, privacidad, solicitudes_enviadas=None, solicitudes_recibidas=None, avatar=None):
+    def __init__(self, username, password, datos_personales, intereses, privacidad,
+                 solicitudes_enviadas=None, solicitudes_recibidas=None, avatar=None,
+                 verificado=False):
         # Inicializa un usuario con sus datos
         self.username = username
         self.password_hash = self.hashear_contrasena(password) if isinstance(password, str) else password
-        self.datos_personales = datos_personales
+        self.datos_personales = datos_personales  # debe incluir 'email'
         self.intereses = intereses
         self.privacidad = privacidad
         self.solicitudes_enviadas = solicitudes_enviadas or []
         self.solicitudes_recibidas = solicitudes_recibidas or []
         self.avatar = avatar or "default.png"
+        self.fotos = []  # lista de objetos Foto
+        self.mensajes_recibidos = []  # lista de Mensaje
+        self.mensajes_enviados = []   # lista de Mensaje
+        self.verificado = verificado
 
     def hashear_contrasena(self, password):
         # Hashea la contraseña para almacenarla de forma segura
@@ -25,7 +59,6 @@ class Usuario:
         return bcrypt.checkpw(password.encode('utf-8'), self.password_hash)
 
     def to_dict(self):
-        # Convierte el usuario a un diccionario para guardarlo en JSON
         return {
             "username": self.username,
             "password_hash": self.password_hash.decode('utf-8') if isinstance(self.password_hash, bytes) else self.password_hash,
@@ -34,12 +67,13 @@ class Usuario:
             "privacidad": self.privacidad,
             "solicitudes_enviadas": self.solicitudes_enviadas,
             "solicitudes_recibidas": self.solicitudes_recibidas,
-            "avatar": self.avatar
+            "avatar": self.avatar,
+            "fotos": [foto.to_dict() for foto in self.fotos],
+            "verificado": self.verificado
         }
 
     @staticmethod
     def from_dict(data):
-        # Crea un usuario a partir de un diccionario (por ejemplo, al cargar desde JSON)
         obj = Usuario(
             data["username"],
             data["password_hash"].encode('utf-8') if isinstance(data["password_hash"], str) else data["password_hash"],
@@ -50,6 +84,8 @@ class Usuario:
             data.get("solicitudes_recibidas", []),
             data.get("avatar", "default.png")
         )
+        obj.fotos = [Foto.from_dict(f) for f in data.get("fotos", [])]
+        obj.verificado = data.get("verificado", False)
         return obj
 
     def calcular_edad(self):
@@ -80,8 +116,7 @@ class RedSocial:
         self.grafo.add_edge(user1, user2)
         self.guardar_datos()
 
-    def obtener_usuario(self, username: str) -> Usuario:
-        # Devuelve el objeto Usuario dado su nombre de usuario
+    def obtener_usuario(self, username):
         return self.grafo.nodes[username]['datos']
 
     def autenticar_usuario(self, username: str, password: str) -> bool:
@@ -93,7 +128,7 @@ class RedSocial:
 
     def listar_usuarios(self):
         # Devuelve la lista de todos los usuarios
-        return list(self.grafo.nodes())
+        return list(self.grafo.nodes)
 
     def recomendar_amigos(self, username: str, top_n: int = 5):
         # Recomienda amigos basados en intereses similares
@@ -151,3 +186,43 @@ class RedSocial:
         for u1, u2 in data.get("amistades", []):
             if u1 in self.grafo and u2 in self.grafo:
                 self.grafo.add_edge(u1, u2)
+        # Actualizar comentarios de fotos para todos los usuarios
+        for username in self.grafo.nodes():
+            usuario = self.grafo.nodes[username]['datos']
+            for foto in usuario.fotos:
+                nuevos_comentarios = []
+                for idx, c in enumerate(foto.comentarios, 1):
+                    if isinstance(c, dict):
+                        nuevos_comentarios.append(c)
+                    elif isinstance(c, tuple) and len(c) == 2:
+                        nuevos_comentarios.append({
+                            "id": idx,
+                            "usuario": c[0],
+                            "texto": c[1]
+                        })
+                foto.comentarios = nuevos_comentarios
+
+    def obtener_usuario_por_email(self, email):
+        for username in self.grafo.nodes:
+            usuario = self.grafo.nodes[username]['datos']
+            if usuario.datos_personales.get('email') == email:
+                return usuario
+        return None
+
+class Mensaje:
+    def __init__(self, emisor, receptor, texto, fecha=None):
+        self.emisor = emisor
+        self.receptor = receptor
+        self.texto = texto
+        self.fecha = fecha or datetime.now().strftime("%Y-%m-%d %H:%M")
+    
+    def to_dict(self):
+        return {
+            "emisor": self.emisor,
+            "receptor": self.receptor,
+            "texto": self.texto,
+            "fecha": self.fecha
+        }
+
+
+
