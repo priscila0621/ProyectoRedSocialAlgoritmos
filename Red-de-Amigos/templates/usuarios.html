@@ -2,62 +2,75 @@
 {% block title %}Usuarios - Entrelazados{% endblock %}
 
 {% block content %}
-<div class="usuarios-container">
-    <div class="usuarios-header">
-        <div class="usuarios-header-title">
-            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height:38px;vertical-align:middle;margin-right:10px;">
-            Usuarios de Entrelazados
-        </div>
-        <!-- Puedes agregar aquí un botón para agregar usuario si lo deseas -->
+<div class="container py-4">
+    <div class="d-flex align-items-center mb-4">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height:38px;vertical-align:middle;margin-right:10px;">
+        <h2 class="mb-0">Usuarios de Entrelazados</h2>
     </div>
 
     <!-- Opciones de búsqueda y filtros -->
-    <form method="get" class="usuarios-busqueda">
-        <input type="text" name="busqueda" placeholder="Buscar usuario..." value="{{ request.args.get('busqueda', '') }}">
-        <select name="filtro">
-            <option value="">Todos</option>
-            <option value="amigos" {% if request.args.get('filtro') == 'amigos' %}selected{% endif %}>Solo amigos</option>
-            <option value="noamigos" {% if request.args.get('filtro') == 'noamigos' %}selected{% endif %}>No amigos</option>
-        </select>
-        <button type="submit" class="btn btn-primary">Buscar</button>
+    <form method="get" class="row g-2 align-items-center mb-4">
+        <div class="col-auto">
+            <input type="text" name="busqueda" class="form-control" placeholder="Buscar usuario..." value="{{ request.args.get('busqueda', '') }}">
+        </div>
+        <div class="col-auto">
+            <select name="filtro" class="form-select">
+                <option value="">Todos</option>
+                <option value="amigos" {% if request.args.get('filtro') == 'amigos' %}selected{% endif %}>Solo amigos</option>
+                <option value="noamigos" {% if request.args.get('filtro') == 'noamigos' %}selected{% endif %}>No amigos</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Buscar</button>
+        </div>
     </form>
 
     <!-- Sección de recomendaciones -->
-    <div style="margin-bottom:32px;">
-        <h3>Recomendaciones de amistad</h3>
-        <div class="usuarios-lista">
+    <div class="mb-5">
+        <h4>Recomendaciones de amistad</h4>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
             {% for recomendado in recomendaciones %}
-            <div class="usuario-card">
-                <img src="{{ url_for('static', filename='avatars/' ~ (recomendado.avatar if recomendado.avatar else 'default.png')) }}" alt="Avatar">
-                <div style="font-weight:bold;color:#235390;">{{ recomendado.username }}</div>
-                <div style="font-size:0.95rem;color:#666;">{{ recomendado.datos_personales.nombre }}</div>
-                <a href="{{ url_for('ver_perfil', username=recomendado.username) }}" class="btn btn-outline-secondary">Ver perfil</a>
-                <a href="{{ url_for('enviar_solicitud', username=recomendado.username) }}" class="btn btn-primary">Agregar amigo</a>
+            <div class="col">
+                <div class="card h-100 text-center">
+                    <img src="{{ url_for('static', filename='avatars/' ~ (recomendado.avatar if recomendado.avatar else 'default.png')) }}" class="card-img-top mx-auto mt-3" alt="Avatar" style="width:80px;height:80px;object-fit:cover;border-radius:50%;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ recomendado.username }}</h5>
+                        <p class="card-text">{{ recomendado.datos_personales.nombre }}</p>
+                        <a href="{{ url_for('ver_perfil', username=recomendado.username) }}" class="btn btn-outline-secondary btn-sm mb-1">Ver perfil</a>
+                        <a href="{{ url_for('enviar_solicitud', username=recomendado.username) }}" class="btn btn-primary btn-sm">Agregar amigo</a>
+                    </div>
+                </div>
             </div>
             {% else %}
-            <div style="color:#888;">Sin recomendaciones por ahora.</div>
+            <div class="col">
+                <div class="alert alert-info text-center">Sin recomendaciones por ahora.</div>
+            </div>
             {% endfor %}
         </div>
     </div>
 
     <!-- Lista de todos los usuarios -->
-    <div>
-        <div class="usuarios-titulo">Todos los usuarios</div>
-        <div class="usuarios-lista">
-            {% for usuario in usuarios %}
-            <div class="usuario-card">
-                <img src="{{ url_for('static', filename='avatars/' ~ (usuario.avatar if usuario.avatar else 'default.png')) }}" alt="Avatar">
-                <div style="font-weight:bold;color:#235390;">{{ usuario.username }}</div>
-                <div style="font-size:0.95rem;color:#666;">{{ usuario.datos_personales.nombre }}</div>
-                <a href="{{ url_for('ver_perfil', username=usuario.username) }}" class="btn btn-outline-secondary">Ver perfil</a>
-                {% if usuario.username not in amigos and usuario.username != session['username'] %}
-                <a href="{{ url_for('enviar_solicitud', username=usuario.username) }}" class="btn btn-primary">Agregar amigo</a>
-                {% endif %}
+    <h4 class="mb-3">Todos los usuarios</h4>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for usuario in usuarios %}
+        <div class="col">
+            <div class="card h-100 text-center">
+                <img src="{{ url_for('static', filename='avatars/' ~ (usuario.avatar if usuario.avatar else 'default.png')) }}" class="card-img-top mx-auto mt-3" alt="Avatar" style="width:80px;height:80px;object-fit:cover;border-radius:50%;">
+                <div class="card-body">
+                    <h5 class="card-title">{{ usuario.username }}</h5>
+                    <p class="card-text">{{ usuario.datos_personales.nombre }}</p>
+                    <a href="{{ url_for('ver_perfil', username=usuario.username) }}" class="btn btn-outline-secondary btn-sm mb-1">Ver perfil</a>
+                    {% if usuario.username not in amigos and usuario.username != session['username'] %}
+                    <a href="{{ url_for('enviar_solicitud', username=usuario.username) }}" class="btn btn-primary btn-sm">Agregar amigo</a>
+                    {% endif %}
+                </div>
             </div>
-            {% else %}
-            <div style="color:#888;">No hay usuarios para mostrar.</div>
-            {% endfor %}
         </div>
+        {% else %}
+        <div class="col">
+            <div class="alert alert-info text-center">No hay usuarios para mostrar.</div>
+        </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

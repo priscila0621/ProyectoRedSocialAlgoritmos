@@ -33,6 +33,12 @@
         <a href="{{ url_for('registro') }}" style="color:#0095f6;">¿No tienes cuenta? Regístrate</a><br>
         <a href="{{ url_for('recuperar_contrasena') }}" style="color:#888;">¿Olvidaste tu contraseña?</a>
     </div>
+    {% if mostrar_reenviar and username %}
+    <form method="post" action="{{ url_for('reenviar_confirmacion') }}">
+        <input type="hidden" name="username" value="{{ username }}">
+        <button type="submit" class="btn-registrar" style="margin-top:10px;">Reenviar correo de confirmación</button>
+    </form>
+    {% endif %}
 </div>
 
 <script>

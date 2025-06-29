@@ -40,70 +40,248 @@
         .edit-btn:hover {
             background: #0056b3;
         }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 18px;
+            margin-top: 15px;
+        }
+        .photo-item, .foto-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 1px 4px #ccc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 150px;
+            max-width: 220px;
+            margin: 0 auto;
+        }
+        .photo-item img, .foto-item img {
+            max-width: 100%;
+            max-height: 180px;
+            border-radius: 5px;
+            object-fit: cover;
+            margin-bottom: 8px;
+        }
+        .btn-eliminar {
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        .btn-eliminar:hover {
+            background: #c82333;
+        }
+        .foto-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            transition: transform 0.2s;
+        }
+        .foto-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 1px 4px #ccc;
+            transition: box-shadow 0.3s, transform 0.3s;
+        }
+        .foto-link:hover .foto-item {
+            box-shadow: 0 4px 24px #888;
+            transform: scale(1.04);
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
     {% include 'navbar.html' %}
-    {% extends 'base.html' %}
-    {% block title %}Perfil{% endblock %}
+    {% extends "base.html" %}
+    {% block title %}Perfil de {{ usuario.username }}{% endblock %}
+
     {% block content %}
-    <div class="profile-container">
-        <div class="profile-header">
-            <!-- Muestra el nombre de usuario y el botón para editar perfil -->
-            <h2>Perfil de {{ usuario.username }}</h2>
-            {% if not externo %}
-            <a href="{{ url_for('editar_perfil') }}" class="edit-btn">Editar perfil</a>
-            {% endif %}
-        </div>
-        <div class="profile-data">
-            <!-- Muestra los datos personales según la privacidad -->
-            <p>Nombre: {{ usuario.datos_personales.nombre }}</p>
-            <p>Edad: {{ usuario.datos_personales.edad }}</p>
-            <h4>Intereses:</h4>
-            <ul class="interests-list">
-                <!-- Lista los intereses del usuario -->
-                {% for interes, detalle in usuario.intereses.items() %}
-                    <li><strong>{{ interes|capitalize }}:</strong> {{ detalle }}</li>
-                {% else %}
-                    <li class="list-group-item text-muted">Sin intereses registrados.</li>
-                {% endfor %}
-            </ul>
-        </div>
-        {% if not externo %}
-        <!-- Muestra recomendaciones de amistad -->
-        <h3>Recomendaciones de amistad</h3>
-        <ul>
-            {% for recomendado in recomendados %}
-                <li>{{ recomendado }}</li>
-            {% else %}
-                <li class="list-group-item text-muted">Sin recomendaciones por ahora.</li>
-            {% endfor %}
-        </ul>
-        <!-- Botón para cerrar sesión -->
-        <a href="{{ url_for('logout') }}" class="edit-btn" style="background:#dc3545;">Cerrar sesión</a>
-        {% else %}
-            {% if not es_amigo %}
-                <a href="{{ url_for('enviar_solicitud', username=usuario.username) }}" class="edit-btn">Agregar amigo</a>
-            {% else %}
-                <span class="edit-btn" style="background: #28a745;">Ya son amigos</span>
-            {% endif %}
-        {% endif %}
-        <a href="{{ url_for('subir_foto') }}">Subir nueva foto</a>
-        <!-- Galería de fotos del usuario -->
-        <h3>Galería de fotos</h3>
-        <div class="gallery">
-            {% for foto in usuario.fotos %}
-                <div class="photo-item">
-                    <img src="{{ url_for('static', filename='fotos/' + foto.filename) }}" alt="Foto de {{ usuario.username }}" class="photo" width="300">
-                    <!-- Formulario para eliminar foto -->
-                    <form action="{{ url_for('eliminar_foto', filename=foto.filename) }}" method="post" style="display:inline;">
-                        <button type="submit" onclick="return confirm('¿Seguro que quieres eliminar esta foto?')">Eliminar</button>
-                    </form>
+    <div class="container py-5" style="max-width: 800px;">
+        <div class="card shadow-lg mb-4" style="border-radius: 18px;">
+            <div class="card-body d-flex flex-column flex-md-row align-items-center gap-4">
+                <img src="{{ url_for('static', filename='avatars/' ~ (usuario.avatar if usuario.avatar else 'default.png')) }}"
+                     alt="Avatar"
+                     class="rounded-circle shadow"
+                     style="width: 120px; height: 120px; object-fit: cover; border: 4px solid #e3eaff;">
+                <div class="flex-grow-1">
+                    <h2 class="mb-1" style="color:#235390;">{{ usuario.datos_personales.nombre }}</h2>
+                    <div class="mb-2 text-muted">@{{ usuario.username }}</div>
+                    <div class="mb-2">
+                        <span class="badge bg-primary">Edad: {{ edad }}</span>
+                        <span class="badge bg-secondary">
+                            Amigos: {{ amigos|length if amigos else 0 }}
+                        </span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Ciudad:</strong> {{ usuario.datos_personales.ciudad }}
+                    </div>
+                    <div class="mb-2">
+                        <strong>Descripción:</strong> {{ usuario.datos_personales.descripcion or "Sin descripción" }}
+                    </div>
+                    <div class="mb-2">
+                        <strong>Intereses:</strong>
+                        {% if usuario.intereses %}
+                            <div class="d-flex flex-wrap gap-2 mt-1">
+                                {% for interes, detalle in usuario.intereses.items() %}
+                                    <span class="badge bg-info text-dark">
+                                        {{ interes }}{% if detalle %}: <span style="font-weight:400;">{{ detalle }}</span>{% endif %}
+                                    </span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <span class="text-muted">Sin intereses registrados.</span>
+                        {% endif %}
+                    </div>
+                    {% if not externo %}
+                        <a href="{{ url_for('editar_perfil') }}" class="btn btn-outline-primary btn-sm mt-2">Editar perfil</a>
+                    {% endif %}
                 </div>
-            {% else %}
-                <p class="text-muted">Sin fotos en la galería.</p>
-            {% endfor %}
+            </div>
         </div>
+
+        {% if not externo %}
+        <!-- Sección de amigos -->
+        <div class="card shadow-sm mb-4" style="border-radius: 14px;">
+            <div class="card-body">
+                <h4 class="mb-3" style="color:#235390;">Amigos</h4>
+                {% if amigos %}
+                    <div class="row g-3">
+                        {% for amigo in amigos %}
+                            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                                <div class="card h-100 text-center" style="border-radius: 10px;">
+                                    <div class="card-body d-flex flex-column align-items-center p-3">
+                                        <img src="{{ url_for('static', filename='avatars/' ~ (amigo.avatar if amigo.avatar else 'default.png')) }}"
+                                             alt="Avatar"
+                                             class="rounded-circle mb-2"
+                                             style="width: 56px; height: 56px; object-fit: cover; border: 2px solid #e3eaff;">
+                                        <div class="fw-bold" style="font-size:1em;">{{ amigo.datos_personales.nombre }}</div>
+                                        <div class="text-muted" style="font-size:0.95em;">@{{ amigo.username }}</div>
+                                        <a href="{{ url_for('ver_perfil', username=amigo.username) }}"
+                                           class="btn btn-outline-primary btn-sm mt-2">Ver perfil</a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <span class="text-muted">No tienes amigos aún.</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Sección de publicaciones/fotos -->
+        <div class="card shadow-sm mb-4" style="border-radius: 14px;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0" style="color:#235390;">
+                        {% if not externo %}
+                            Tus publicaciones
+                        {% else %}
+                            Publicaciones
+                        {% endif %}
+                    </h4>
+                    {% if not externo %}
+                        <a href="{{ url_for('subir_foto') }}" class="btn btn-success btn-sm">Subir foto</a>
+                    {% endif %}
+                </div>
+                <div class="row g-4">
+                    {% for foto in usuario.fotos %}
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm" style="border-radius: 14px;">
+                                <div class="card-header bg-white d-flex align-items-center gap-2" style="border-bottom: 1px solid #eee;">
+                                    <img src="{{ url_for('static', filename='avatars/' ~ (usuario.avatar if usuario.avatar else 'default.png')) }}"
+                                         alt="Avatar"
+                                         class="rounded-circle"
+                                         style="width: 38px; height: 38px; object-fit: cover; border: 2px solid #e3eaff;">
+                                    <div>
+                                        <div class="fw-bold" style="font-size:1em;">{{ usuario.datos_personales.nombre }}</div>
+                                        <div class="text-muted" style="font-size:0.93em;">@{{ usuario.username }}</div>
+                                    </div>
+                                    <div class="ms-auto text-muted" style="font-size:0.9em;">
+                                        {{ foto.fecha if foto.fecha else '' }}
+                                    </div>
+                                </div>
+                                <img src="{{ url_for('static', filename='fotos/' ~ foto.filename) }}"
+                                     class="card-img-top"
+                                     alt="Foto"
+                                     style="object-fit:cover; max-height:260px; border-radius: 0 0 12px 12px;">
+                                <div class="card-body d-flex flex-column">
+                                    <p class="card-text" style="font-size:1.08em; color:#333;">{{ foto.descripcion }}</p>
+                                    <a href="{{ url_for('ver_publicacion', username=usuario.username, filename=foto.filename) }}"
+                                       class="btn btn-outline-primary btn-sm mt-auto">Ver publicación</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="col">
+                            <span class="text-muted">No has subido fotos aún.</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        {% if not externo %}
+        <!-- Sección de recomendaciones de amistad -->
+        <div class="card shadow-sm" style="border-radius: 14px;">
+            <div class="card-body">
+                <h4 class="mb-3" style="color:#235390;">Recomendaciones de amistad</h4>
+                <div class="d-flex flex-wrap gap-3">
+                    {% for recomendado in recomendados %}
+                        <div class="text-center">
+                            <img src="{{ url_for('static', filename='avatars/' ~ (recomendado.avatar if recomendado.avatar else 'default.png')) }}"
+                                 alt="Avatar"
+                                 class="rounded-circle"
+                                 style="width: 60px; height: 60px; object-fit: cover; border: 2px solid #e3eaff;">
+                            <div style="font-size:0.95em;">{{ recomendado.username }}</div>
+                            <a href="{{ url_for('enviar_solicitud', username=recomendado.username) }}"
+                               class="btn btn-success btn-sm mt-1">Agregar amigo</a>
+                        </div>
+                    {% else %}
+                        <span class="text-muted">Sin recomendaciones por ahora.</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if externo %}
+            <div class="card shadow-sm mb-4" style="border-radius: 14px;">
+                <div class="card-body">
+                    <h4 class="mb-3" style="color:#235390;">Amigos en común</h4>
+                    {% if amigos_en_comun %}
+                        <div class="row g-3">
+                            {% for amigo in amigos_en_comun %}
+                                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                                    <div class="card h-100 text-center" style="border-radius: 10px;">
+                                        <div class="card-body d-flex flex-column align-items-center p-3">
+                                            <img src="{{ url_for('static', filename='avatars/' ~ (amigo.avatar if amigo.avatar else 'default.png')) }}"
+                                                 alt="Avatar"
+                                                 class="rounded-circle mb-2"
+                                                 style="width: 56px; height: 56px; object-fit: cover; border: 2px solid #e3eaff;">
+                                            <div class="fw-bold" style="font-size:1em;">{{ amigo.datos_personales.nombre }}</div>
+                                            <div class="text-muted" style="font-size:0.95em;">@{{ amigo.username }}</div>
+                                            <a href="{{ url_for('ver_perfil', username=amigo.username) }}"
+                                               class="btn btn-outline-primary btn-sm mt-2">Ver perfil</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <span class="text-muted">No tienen amigos en común.</span>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
     </div>
     {% endblock %}
 </body>

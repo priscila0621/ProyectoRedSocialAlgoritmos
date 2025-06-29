@@ -4,6 +4,7 @@ from werkzeug.utils import secure_filename
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer
 import os
+import datetime
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
@@ -39,13 +40,46 @@ def registro():
         # Obtén los datos del formulario
         username = request.form['username']
         password = request.form['password']
+        confirm_password = request.form['confirm_password']
         nombre = request.form['nombre']
-        edad = request.form['edad']
         email = request.form['email']
-        intereses = {}  # Llena esto según tu lógica
+        ciudad = request.form.get('ciudad', '')
+        descripcion = request.form.get('descripcion', '')
+        intereses_seleccionados = request.form.getlist('intereses')
+        intereses = {}
+        for interes in intereses_seleccionados:
+            detalle = request.form.get(f'detalle_{interes}', '')
+            intereses[interes] = detalle
         privacidad = {} # Llena esto según tu lógica
+        fecha_nacimiento = request.form['fecha_nacimiento']
+        try:
+            nacimiento = datetime.datetime.strptime(fecha_nacimiento, "%Y-%m-%d").date()
+        except ValueError:
+            flash("Fecha de nacimiento inválida.", "danger")
+            return render_template('register.html')
 
-        usuario = Usuario(username, password, {"nombre": nombre, "edad": edad, "email": email}, intereses, privacidad)
+        hoy = datetime.date.today()
+        edad = hoy.year - nacimiento.year - ((hoy.month, hoy.day) < (nacimiento.month, nacimiento.day))
+        if edad < 16:
+            flash("Debes tener al menos 16 años para registrarte.", "danger")
+            return render_template('register.html')
+
+        fecha_registro = datetime.date.today().isoformat()
+
+        if password != confirm_password:
+            flash("Las contraseñas no coinciden.", "danger")
+            return render_template('register.html')
+
+        datos_personales = {
+            "nombre": nombre,
+            "fecha_nacimiento": fecha_nacimiento,
+            "email": email,
+            "ciudad": ciudad,
+            "descripcion": descripcion,
+            "fecha_registro": fecha_registro
+        }
+
+        usuario = Usuario(username, password, datos_personales, intereses, privacidad)
         try:
             red.registrar_usuario(usuario)
             # --- Aquí va el envío del correo de verificación ---
@@ -67,6 +101,10 @@ def login():
         username = request.form['username']
         password = request.form['password']
         if red.autenticar_usuario(username, password):
+            usuario = red.obtener_usuario(username)
+            if not getattr(usuario, "verificado", False):
+                flash("Debes confirmar tu correo antes de iniciar sesión.", "warning")
+                return render_template('login.html', ocultar_nav=True, username=username, mostrar_reenviar=True)
             session['username'] = username
             return redirect(url_for('feed'))
         flash("Usuario o contraseña incorrectos.", "danger")
@@ -80,17 +118,44 @@ def logout():
 
 @app.route('/feed')
 def feed():
-    if 'username' not in session or session['username'] not in red.listar_usuarios():
-        session.clear()
-        return redirect(url_for('login'))
     usuario = red.obtener_usuario(session['username'])
     amigos = list(red.grafo.neighbors(usuario.username))
-    fotos_feed = []
-    for amigo in amigos + [usuario.username]:
-        u = red.obtener_usuario(amigo)
-        fotos_feed.extend(u.fotos)
-    fotos_feed.reverse()
-    return render_template('feed.html', fotos=fotos_feed)
+    usuarios_feed = amigos  # <-- Solo amigos, no te incluyas a ti mismo
+    publicaciones = []
+    for u in usuarios_feed:
+        amigo = red.obtener_usuario(u)
+        for foto in getattr(amigo, 'fotos', []):
+            publicaciones.append({
+                'usuario': amigo,
+                'foto': foto
+            })
+    publicaciones.sort(key=lambda x: getattr(x['foto'], 'fecha', ''), reverse=True)
+
+    # --- Conversaciones para la mensajería lateral ---
+    conversaciones_usernames = set()
+    if hasattr(usuario, 'mensajes_enviados'):
+        conversaciones_usernames.update(
+            m['receptor'] if isinstance(m, dict) else m.receptor
+            for m in usuario.mensajes_enviados
+        )
+    if hasattr(usuario, 'mensajes_recibidos'):
+        conversaciones_usernames.update(
+            m['emisor'] if isinstance(m, dict) else m.emisor
+            for m in usuario.mensajes_recibidos
+        )
+    conversaciones_usernames.discard(usuario.username)
+    conversaciones = [red.obtener_usuario(u) for u in conversaciones_usernames if red.obtener_usuario(u)]
+
+    return render_template(
+        'feed.html',
+        publicaciones=publicaciones,
+        conversaciones=conversaciones
+    )
+
+def calcular_edad(fecha_nacimiento):
+    hoy = datetime.date.today()
+    nacimiento = datetime.datetime.strptime(fecha_nacimiento, "%Y-%m-%d").date()
+    return hoy.year - nacimiento.year - ((hoy.month, hoy.day) < (nacimiento.month, nacimiento.day))
 
 # Ruta para ver tu propio perfil
 @app.route('/perfil')
@@ -98,31 +163,52 @@ def perfil():
     if 'username' not in session:
         return redirect(url_for('login'))
     usuario = red.obtener_usuario(session['username'])
-    recomendados_usernames = red.recomendar_amigos(session['username'])
-    recomendados = [red.obtener_usuario(u) for u in recomendados_usernames]
-    return render_template('profile.html', usuario=usuario, externo=False, es_amigo=False, recomendados=recomendados)
+
+    # Para el perfil propio
+    amigos_usernames = list(red.grafo.neighbors(usuario.username))
+    amigos = [red.obtener_usuario(u) for u in amigos_usernames]
+
+    fecha_nacimiento = usuario.datos_personales.get('fecha_nacimiento')
+    edad = calcular_edad(fecha_nacimiento) if fecha_nacimiento else 0
+    recomendados = []
+    return render_template('profile.html', usuario=usuario, edad=edad, recomendados=recomendados, amigos=amigos)
 
 # Ruta para ver el perfil de otro usuario
 @app.route('/ver_perfil/<username>')
 def ver_perfil(username):
-    usuario = red.obtener_usuario(username)  # Debe buscar el usuario por el username recibido
+    usuario = red.obtener_usuario(username)
     if not usuario:
         flash("Usuario no encontrado.", "danger")
         return redirect(url_for('usuarios'))
     externo = (username != session['username'])
-    amigos = list(red.grafo.neighbors(session['username']))
-    es_amigo = username in amigos
-    # Si quieres recomendaciones solo para el perfil propio:
+    amigos_usernames = list(red.grafo.neighbors(username))
+    amigos = [red.obtener_usuario(u) for u in amigos_usernames]
+    es_amigo = session['username'] in amigos_usernames
+
+    amigos_en_comun = []
+    if externo:
+        mis_amigos = set(red.grafo.neighbors(session['username']))
+        sus_amigos = set(amigos_usernames)
+        amigos_en_comun = [red.obtener_usuario(u) for u in mis_amigos & sus_amigos if u != session['username']]
+
     recomendados = []
     if not externo:
         recomendaciones_usernames = red.recomendar_amigos(session['username'])
         recomendados = [red.obtener_usuario(u) for u in recomendaciones_usernames]
+
+    # --- Cálculo de edad ---
+    fecha_nacimiento = usuario.datos_personales.get('fecha_nacimiento')
+    edad = calcular_edad(fecha_nacimiento) if fecha_nacimiento else 0
+
     return render_template(
         'profile.html',
         usuario=usuario,
         externo=externo,
         es_amigo=es_amigo,
-        recomendados=recomendados
+        recomendados=recomendados,
+        amigos=amigos,
+        amigos_en_comun=amigos_en_comun,
+        edad=edad
     )
 
 @app.route('/editar_perfil', methods=['GET', 'POST'])
@@ -134,7 +220,18 @@ def editar_perfil():
                   "ciencia", "historia", "tecnologia", "moda", "viajes", "comida", "animales", "naturaleza", "otros"]
     if request.method == 'POST':
         usuario.datos_personales['nombre'] = request.form['nombre']
-        usuario.datos_personales['edad'] = request.form['edad']
+        fecha_nacimiento = request.form.get('fecha_nacimiento')
+        usuario.datos_personales['fecha_nacimiento'] = fecha_nacimiento
+        if fecha_nacimiento:
+            hoy = datetime.date.today()
+            nacimiento = datetime.datetime.strptime(fecha_nacimiento, "%Y-%m-%d").date()
+            edad = hoy.year - nacimiento.year - ((hoy.month, hoy.day) < (nacimiento.month, nacimiento.day))
+            usuario.datos_personales['edad'] = edad
+
+        # AGREGA ESTO:
+        usuario.datos_personales['ciudad'] = request.form.get('ciudad', '')
+        usuario.datos_personales['descripcion'] = request.form.get('descripcion', '')
+
         intereses = {}
         for cat in categorias:
             if cat in request.form:
@@ -186,7 +283,7 @@ def usuarios():
 def buscar():
     if 'username' not in session:
         return redirect(url_for('login'))
-    resultados = []
+    resultados = None
     if request.method == 'POST':
         query = request.form['query'].lower()
         resultados = [u for u in red.listar_usuarios() if query in u.lower() and u != session['username']]
@@ -210,7 +307,8 @@ def solicitudes():
     if 'username' not in session:
         return redirect(url_for('login'))
     usuario = red.obtener_usuario(session['username'])
-    return render_template('solicitudes.html', solicitudes=usuario.solicitudes_recibidas)
+    solicitudes_obj = [red.obtener_usuario(u) for u in usuario.solicitudes_recibidas]
+    return render_template('solicitudes.html', solicitudes=solicitudes_obj)
 
 @app.route('/aceptar_solicitud/<username>')
 def aceptar_solicitud(username):
@@ -291,7 +389,7 @@ def comentar_foto(autor, filename):
         nuevo_id = max([c["id"] for c in foto.comentarios], default=0) + 1
         foto.comentarios.append({
             "id": nuevo_id,
-            "usuario": session['username'],
+            "usuario": session['username'],  # <-- debe ser el username
             "texto": texto
         })
         red.guardar_datos()
@@ -347,7 +445,7 @@ def ver_foto(username, filename):
             nuevo_id = max([c["id"] for c in foto.comentarios if isinstance(c, dict)], default=0) + 1
             foto.comentarios.append({
                 "id": nuevo_id,
-                "usuario": session['username'],
+                "usuario": session['username'],  # <-- debe ser el username
                 "texto": comentario
             })
             red.guardar_datos()
@@ -380,30 +478,26 @@ def eliminar_comentario(autor, filename, comentario_id):
 
 @app.route('/mensajes/<username>', methods=['GET', 'POST'])
 def mensajes(username):
-    if 'username' not in session:
-        return redirect(url_for('login'))
     usuario = red.obtener_usuario(session['username'])
     otro = red.obtener_usuario(username)
-    if not otro:
-        flash("Usuario no encontrado.", "danger")
-        return redirect(url_for('amigos'))
-    # Mostrar mensajes entre ambos
-    conversacion = []
-    for m in usuario.mensajes_enviados:
-        if m.receptor == username:
-            conversacion.append(m)
-    for m in usuario.mensajes_recibidos:
-        if m.emisor == username:
-            conversacion.append(m)
-    conversacion.sort(key=lambda m: m.fecha)
     if request.method == 'POST':
         texto = request.form['mensaje']
-        mensaje = Mensaje(usuario.username, username, texto)
-        usuario.mensajes_enviados.append(mensaje)
-        otro.mensajes_recibidos.append(mensaje)
+        nuevo_mensaje = {
+            'emisor': usuario.username,
+            'receptor': otro.username,
+            'texto': texto,
+            'fecha': datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+        }
+        if not hasattr(usuario, 'mensajes_enviados'):
+            usuario.mensajes_enviados = []
+        usuario.mensajes_enviados.append(nuevo_mensaje)
+        if not hasattr(otro, 'mensajes_recibidos'):
+            otro.mensajes_recibidos = []
+        otro.mensajes_recibidos.append(nuevo_mensaje)
         red.guardar_datos()
-        return redirect(url_for('mensajes', username=username))
-    return render_template('mensajes.html', usuario=usuario, otro=otro, conversacion=conversacion)
+        return redirect(url_for('mensajes', username=otro.username))
+    conversacion = obtener_conversacion(usuario.username, otro.username)
+    return render_template('mensajes.html', usuario=usuario, otro=otro, mensajes=conversacion)
 
 @app.route('/enviar_mensaje/<username>', methods=['GET', 'POST'])
 def enviar_mensaje(username):
@@ -476,6 +570,46 @@ def resetear_contrasena(token):
             return redirect(url_for('login'))
     return render_template('resetear_contrasena.html', ocultar_nav=True)
 
+@app.route('/reenviar_confirmacion', methods=['POST'])
+def reenviar_confirmacion():
+    username = request.form.get('username')
+    usuario = red.obtener_usuario(username)
+    if usuario and not getattr(usuario, "verificado", False):
+        token = generar_token(usuario.datos_personales['email'])
+        enlace = url_for('confirmar_correo', token=token, _external=True)
+        msg = Message('Confirma tu correo', sender='tu-correo', recipients=[usuario.datos_personales['email']])
+        msg.body = f'Por favor confirma tu correo haciendo clic en este enlace: {enlace}'
+        mail.send(msg)
+        flash("Se ha reenviado el correo de confirmación.", "info")
+    else:
+        flash("No se pudo reenviar el correo de confirmación.", "danger")
+    return render_template('login.html', ocultar_nav=True, username=username)
+
+@app.route('/editar_descripcion/<filename>', methods=['POST'])
+def editar_descripcion(filename):
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    usuario = red.obtener_usuario(session['username'])
+    nueva_desc = request.form['nueva_descripcion']
+    for foto in getattr(usuario, 'fotos', []):
+        if foto.filename == filename:
+            foto.descripcion = nueva_desc
+            red.guardar_datos()
+            break
+    return redirect(url_for('perfil'))
+
+@app.route('/eliminar_publicacion/<filename>', methods=['POST'])
+def eliminar_publicacion(filename):
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    usuario = red.obtener_usuario(session['username'])
+    fotos = getattr(usuario, 'fotos', [])
+    nueva_lista = [foto for foto in fotos if foto.filename != filename]
+    if len(nueva_lista) < len(fotos):
+        usuario.fotos = nueva_lista
+        red.guardar_datos()
+    return redirect(url_for('perfil'))
+
 def generar_token(email):
     s = URLSafeTimedSerializer(app.secret_key)
     return s.dumps(email, salt="email-confirm")
@@ -487,6 +621,35 @@ def verificar_token(token, max_age=3600):
     except Exception:
         return None
     return email
+
+def obtener_conversacion(username1, username2):
+    """Devuelve la lista de mensajes entre dos usuarios, ordenada por fecha."""
+    usuario1 = red.obtener_usuario(username1)
+    usuario2 = red.obtener_usuario(username2)
+    mensajes = []
+    # Mensajes enviados de usuario1 a usuario2
+    for m in getattr(usuario1, 'mensajes_enviados', []):
+        if getattr(m, 'receptor', None) == username2 or (isinstance(m, dict) and m.get('receptor') == username2):
+            mensajes.append({
+                'emisor': username1,
+                'texto': m.texto if hasattr(m, 'texto') else m.get('texto'),
+                'fecha': m.fecha if hasattr(m, 'fecha') else m.get('fecha')
+            })
+    # Mensajes enviados de usuario2 a usuario1
+    for m in getattr(usuario2, 'mensajes_enviados', []):
+        if getattr(m, 'receptor', None) == username1 or (isinstance(m, dict) and m.get('receptor') == username1):
+            mensajes.append({
+                'emisor': username2,
+                'texto': m.texto if hasattr(m, 'texto') else m.get('texto'),
+                'fecha': m.fecha if hasattr(m, 'fecha') else m.get('fecha')
+            })
+    # Ordena por fecha si existe
+    mensajes.sort(key=lambda x: x['fecha'])
+    return mensajes
+
+def guardar_conversacion(username1, username2, conversacion):
+    """No hace nada porque los mensajes ya se guardan en los usuarios."""
+    pass
 
 # Convierte comentarios antiguos (tuplas) a diccionarios
 for username in red.listar_usuarios():
@@ -505,6 +668,40 @@ for username in red.listar_usuarios():
         foto.comentarios = nuevos_comentarios
 red.guardar_datos()
 print("Comentarios convertidos a diccionarios.")
+
+@app.route('/publicacion/<username>/<filename>', methods=['GET', 'POST'])
+def ver_publicacion(username, filename):
+    usuario = red.obtener_usuario(username)
+    foto = next((f for f in usuario.fotos if f.filename == filename), None)
+    if not foto:
+        flash("Publicación no encontrada.", "danger")
+        return redirect(url_for('ver_perfil', username=username))
+
+    if not hasattr(foto, 'likes') or foto.likes is None:
+        foto.likes = set()
+    # Convierte a lista para Jinja2
+    foto.likes = list(foto.likes)
+    if not hasattr(foto, 'comentarios') or foto.comentarios is None:
+        foto.comentarios = []
+
+    if request.method == 'POST':
+        if 'like' in request.form and 'username' in session:
+            user = session['username']
+            if user in foto.likes:
+                foto.likes.remove(user)  # Quitar el like si ya lo tiene
+            else:
+                foto.likes.add(user)     # Agregar el like si no lo tiene
+            red.guardar_datos()
+            # Redirige después de dar like
+            return redirect(url_for('ver_publicacion', username=username, filename=filename))
+        elif 'comentario' in request.form and 'username' in session:
+            comentario = request.form['comentario']
+            foto.comentarios.append({'usuario': session['username'], 'texto': comentario})  # <-- Cambia 'autor' por 'usuario'
+            red.guardar_datos()
+            # Redirige después de comentar
+            return redirect(url_for('ver_publicacion', username=username, filename=filename))
+
+    return render_template('publicacion.html', usuario=usuario, foto=foto)
 
 if __name__ == "__main__":
     print("Servidor corriendo en: http://localhost:5000/")

@@ -27,7 +27,9 @@
             "intereses": {},
             "privacidad": {},
             "solicitudes_enviadas": [],
-            "solicitudes_recibidas": [],
+            "solicitudes_recibidas": [
+                "Cecilia:)"
+            ],
             "avatar": "default.png",
             "fotos": [
                 {
@@ -57,12 +59,172 @@
             "avatar": "default.png",
             "fotos": [],
             "verificado": false
+        },
+        "Cecilia:)": {
+            "username": "Cecilia:)",
+            "password_hash": "$2b$12$jIqAyKXAQGWuNv2A0sCmV.rfLtGtJo4Af/.n9DnV4aqnh9zicKLa2",
+            "datos_personales": {
+                "nombre": "Cecilia Urroz",
+                "edad": 18,
+                "email": "emmaceciliaserranourroz@gmail.com",
+                "fecha_nacimiento": "2007-04-24",
+                "ciudad": "Managua, Nicaragua",
+                "descripcion": "Life goes on"
+            },
+            "intereses": {
+                "musica": "One Direction, Bangtan y CAS",
+                "libros": "Romantasy y Thriller",
+                "peliculas": "RomComs Lover",
+                "comida": "Amo la Lasagna"
+            },
+            "privacidad": {
+                "nombre": false,
+                "edad": false
+            },
+            "solicitudes_enviadas": [
+                "Jey19"
+            ],
+            "solicitudes_recibidas": [],
+            "avatar": "Cecilia_avatar.jpg",
+            "fotos": [
+                {
+                    "filename": "Cecilia_photodump.jpg",
+                    "descripcion": "El moyo natural es mejor que el de taro.",
+                    "autor": "Cecilia:)",
+                    "comentarios": [
+                        {
+                            "autor": "Rebequita",
+                            "texto": "\u00a1El de taro es mejor!"
+                        }
+                    ],
+                    "likes": [
+                        "Cecilia:)",
+                        "Rebequita",
+                        "Michelita"
+                    ]
+                },
+                {
+                    "filename": "Cecilia_photodump3.jpg",
+                    "descripcion": "Smooth like butter!!!",
+                    "autor": "Cecilia:)",
+                    "comentarios": [],
+                    "likes": [
+                        "Cecilia:)",
+                        "Rebequita"
+                    ]
+                },
+                {
+                    "filename": "Cecilia_photodump2.jpg",
+                    "descripcion": "Odiamos ingl\u00e9s, pero amamos las donas.",
+                    "autor": "Cecilia:)",
+                    "comentarios": [
+                        {
+                            "id": 1,
+                            "usuario": "Michelita",
+                            "texto": "\u00a1Vivan las donas!"
+                        }
+                    ],
+                    "likes": [
+                        "Michelita"
+                    ]
+                }
+            ],
+            "verificado": true
+        },
+        "Michelita": {
+            "username": "Michelita",
+            "password_hash": "$2b$12$94J.gSo0719Ft/ZjBy044uegDmlYLq1XMyzFBehfQKkLC1yBzY.my",
+            "datos_personales": {
+                "nombre": "Michelle Prado",
+                "edad": "15",
+                "email": "michellepradorivas2010@gmail.com"
+            },
+            "intereses": {},
+            "privacidad": {},
+            "solicitudes_enviadas": [],
+            "solicitudes_recibidas": [],
+            "avatar": "default.png",
+            "fotos": [],
+            "verificado": true
+        },
+        "Rebequita": {
+            "username": "Rebequita",
+            "password_hash": "$2b$12$YMD9uCGlCDisC/6WqRB.ceIbq5pC.oqrOUPPAoPrnfPi80ePtwZ4K",
+            "datos_personales": {
+                "nombre": "Liessibeth Prado",
+                "fecha_nacimiento": "2003-09-20",
+                "email": "cecilialiessibeth@gmail.com",
+                "fecha_registro": "2025-06-28",
+                "edad": 21,
+                "ciudad": "Managua, Nicaragua",
+                "descripcion": "Hakuna Matata B\u00a1tch"
+            },
+            "intereses": {
+                "musica": "#RealHastaLaMuerte",
+                "libros": "Lore Olympus Fan",
+                "comida": "Me encanta el pur\u00e9 de papa",
+                "animales": "Amo los puppies"
+            },
+            "privacidad": {
+                "nombre": false,
+                "edad": false
+            },
+            "solicitudes_enviadas": [],
+            "solicitudes_recibidas": [],
+            "avatar": "default.png",
+            "fotos": [
+                {
+                    "filename": "Rebequita_rebe.jpg",
+                    "descripcion": "\u00a1MI NUEVA ADQUISICI\u00d3N!",
+                    "autor": "Rebequita",
+                    "comentarios": [],
+                    "likes": [
+                        "Cecilia:)"
+                    ]
+                }
+            ],
+            "verificado": true
+        },
+        "Yuyu": {
+            "username": "Yuyu",
+            "password_hash": "$2b$12$FM/Wa738fkqlhsdeTTXWneEmdSeuF2byJznEtCSqyc5GqSFu8A69y",
+            "datos_personales": {
+                "nombre": "Marcela Rivas",
+                "fecha_nacimiento": "1993-03-16",
+                "email": "aleurroz02@gmail.com",
+                "ciudad": "",
+                "descripcion": "",
+                "fecha_registro": "2025-06-28"
+            },
+            "intereses": {
+                "musica": "Me encanta la m\u00fasica de banda.",
+                "peliculas": "Oh, Mr. Darcy...",
+                "moda": "Amo el estampado floral."
+            },
+            "privacidad": {},
+            "solicitudes_enviadas": [],
+            "solicitudes_recibidas": [],
+            "avatar": "default.png",
+            "fotos": [],
+            "verificado": true
         }
     },
     "amistades": [
         [
             "Priscila19",
             "Jey19"
+        ],
+        [
+            "Cecilia:)",
+            "Michelita"
+        ],
+        [
+            "Cecilia:)",
+            "Rebequita"
+        ],
+        [
+            "Rebequita",
+            "Yuyu"
         ]
     ]
 }

@@ -1,22 +1,79 @@
-{% extends 'base.html' %}
-{% block title %}Mensajes con {{ otro.username }}{% endblock %}
+{% extends "base.html" %}
+{% block title %}Chat con {{ otro.datos_personales.nombre }}{% endblock %}
 {% block content %}
-<h2>Conversación con {{ otro.username }}</h2>
-<div style="max-width:600px;margin:auto;">
-    <div style="background:#f4f6fb;padding:16px;border-radius:8px;min-height:200px;">
-        {% for mensaje in conversacion %}
-            <div style="margin-bottom:10px;">
-                <b>{{ mensaje.emisor }}:</b> {{ mensaje.texto }}
-                <span style="color:#888;font-size:0.9em;">{{ mensaje.fecha }}</span>
+<div class="container py-4" style="max-width: 600px;">
+    <div class="card shadow" style="border-radius: 18px;">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center mb-4">
+                <img src="{{ url_for('static', filename='avatars/' ~ (otro.avatar if otro.avatar else 'default.png')) }}"
+                     alt="Avatar"
+                     class="rounded-circle"
+                     style="width: 56px; height: 56px; object-fit: cover; border: 2px solid #e3eaff;">
+                <div class="ms-3">
+                    <div class="fw-bold" style="font-size:1.2em;">{{ otro.datos_personales.nombre }}</div>
+                    <div class="text-muted" style="font-size:0.95em;">@{{ otro.username }}</div>
+                </div>
             </div>
-        {% else %}
-            <div style="color:#888;">No hay mensajes aún.</div>
-        {% endfor %}
+            <div id="chat-box" class="mb-3" style="height: 340px; overflow-y: auto; background: #f8f9fa; border-radius: 12px; padding: 18px;">
+                {% for mensaje in mensajes %}
+                    <div class="d-flex mb-2 {% if mensaje.emisor == usuario.username %}justify-content-end{% else %}justify-content-start{% endif %}">
+                        <div class="chat-bubble {% if mensaje.emisor == usuario.username %}sent{% else %}received{% endif %}">
+                            <div style="font-size:0.95em; display: flex; justify-content: space-between;">
+                                <span>
+                                    {% if mensaje.emisor == usuario.username %}
+                                        <span class="fw-bold text-success">Tú</span>
+                                    {% else %}
+                                        <span class="fw-bold text-primary">{{ otro.datos_personales.nombre }}</span>
+                                    {% endif %}
+                                </span>
+                                <span class="text-muted" style="font-size:0.85em; margin-left:10px;">
+                                    {{ mensaje.fecha }}
+                                </span>
+                            </div>
+                            <div style="margin-top:2px;">{{ mensaje.texto }}</div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted mt-5">No hay mensajes aún. ¡Empieza la conversación!</div>
+                {% endfor %}
+            </div>
+            <form method="post" class="d-flex gap-2">
+                <input type="text" name="mensaje" class="form-control" placeholder="Escribe un mensaje..." autocomplete="off" required>
+                <button type="submit" class="btn btn-success px-4">Enviar</button>
+            </form>
+        </div>
     </div>
-    <form method="post" style="margin-top:16px;display:flex;gap:8px;">
-        <input type="text" name="mensaje" placeholder="Escribe un mensaje..." required style="flex:1;padding:8px;">
-        <button type="submit" style="padding:8px 16px;">Enviar</button>
-    </form>
-    <a href="{{ url_for('amigos') }}">← Volver a amigos</a>
 </div>
+<style>
+    .chat-bubble {
+        max-width: 70%;
+        padding: 10px 16px;
+        border-radius: 18px;
+        margin-bottom: 2px;
+        font-size: 1em;
+        box-shadow: 0 1px 4px #e3eaff;
+        word-break: break-word;
+    }
+    .chat-bubble.sent {
+        background: #d1f7c4;
+        align-self: flex-end;
+        border-bottom-right-radius: 6px;
+    }
+    .chat-bubble.received {
+        background: #e3eaff;
+        align-self: flex-start;
+        border-bottom-left-radius: 6px;
+    }
+    #chat-box {
+        scrollbar-width: thin;
+        scrollbar-color: #b3c6ff #f8f9fa;
+    }
+</style>
+<script>
+    // Scroll automático al final del chat
+    window.onload = function() {
+        var chatBox = document.getElementById("chat-box");
+        if(chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+    }
+</script>
 {% endblock %}

@@ -40,7 +40,8 @@
         {% if session.get('username') %}
         <form action="{{ url_for('ver_foto', username=usuario.username, filename=foto.filename) }}" method="post" style="margin-top:10px;">
             <input type="text" name="comentario" placeholder="Agrega un comentario..." required style="width:70%; padding:6px; border-radius:5px; border:1px solid #ccc;">
-            <button type="submit" style="background:#0095f6; color:#fff; border:none; border-radius:5px; padding:6px 14px; margin-left:6px;">Comentar</button>
+            <!-- Botón de comentar bonito y verde -->
+            <button type="submit" class="btn btn-success">Comentar</button>
         </form>
         {% endif %}
     </div>

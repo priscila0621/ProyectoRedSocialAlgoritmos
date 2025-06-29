@@ -5,22 +5,43 @@
     <link rel="stylesheet" href="/static/css/estilo.css">
 </head>
 <body>
-    {% extends 'base.html' %}
-    {% block title %}Buscar Usuarios{% endblock %}
+    {% extends "base.html" %}
+    {% block title %}Buscar usuarios{% endblock %}
     {% block content %}
-    <h2>Buscar usuarios</h2>
-    <form method="POST">
-        <input name="query" placeholder="Nombre de usuario">
-        <button type="submit">Buscar</button>
-    </form>
-    <ul>
-        {% for user in resultados %}
-            <li>
-                <a href="{{ url_for('ver_perfil', username=user) }}">{{ user }}</a>
-                <a href="{{ url_for('enviar_solicitud', username=user) }}" class="btn btn-success btn-sm">Agregar amigo</a>
-            </li>
-        {% endfor %}
-    </ul>
+    <div class="container py-5" style="max-width: 600px;">
+        <div class="card shadow mb-4" style="border-radius: 16px;">
+            <div class="card-body">
+                <h2 class="mb-4 text-center" style="color:#235390;">Buscar usuarios</h2>
+                <form method="POST" class="d-flex mb-3" role="search">
+                    <input class="form-control me-2" type="search" name="query" placeholder="Buscar por nombre de usuario..." aria-label="Buscar" required>
+                    <button class="btn btn-success" type="submit">Buscar</button>
+                </form>
+                <!-- Solo muestra el mensaje si ya se hizo una búsqueda -->
+                {% if resultados is not none %}
+                    {% if resultados %}
+                        <!-- Mostrar resultados -->
+                        <ul>
+                            {% for usuario in resultados %}
+                                <li>{{ usuario }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <div class="text-muted text-center">No se encontraron usuarios con ese nombre.</div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <style>
+        .list-group-item {
+            transition: background 0.15s, box-shadow 0.15s;
+        }
+        .list-group-item:hover {
+            background: #e3eaff;
+            box-shadow: 0 2px 8px #b3c6ff;
+            text-decoration: none;
+        }
+    </style>
     {% endblock %}
 </body>
 </html>

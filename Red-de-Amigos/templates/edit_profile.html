@@ -7,8 +7,20 @@
     <form method="POST" enctype="multipart/form-data">
         <label>Nombre:</label>
         <input name="nombre" value="{{ usuario.datos_personales.nombre }}" required><br>
-        <label>Edad:</label>
-        <input name="edad" value="{{ usuario.datos_personales.edad }}" required><br>
+        <div class="mb-3">
+            <label for="fecha_nacimiento" class="form-label">Fecha de nacimiento</label>
+            <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento"
+                   value="{{ usuario.datos_personales['fecha_nacimiento'] if usuario.datos_personales.get('fecha_nacimiento') else '' }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="ciudad" class="form-label">Ciudad</label>
+            <input type="text" class="form-control" id="ciudad" name="ciudad"
+                   value="{{ usuario.datos_personales.ciudad if usuario.datos_personales.ciudad else '' }}">
+        </div>
+        <div class="mb-3">
+            <label for="descripcion" class="form-label">Descripción</label>
+            <textarea class="form-control" id="descripcion" name="descripcion" rows="2">{{ usuario.datos_personales.descripcion if usuario.datos_personales.descripcion else '' }}</textarea>
+        </div>
         <h4>Intereses:</h4>
         <!-- Lista de intereses con detalles -->
         {% for cat in categorias %}

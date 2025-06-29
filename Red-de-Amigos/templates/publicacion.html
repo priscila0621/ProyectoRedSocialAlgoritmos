@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Publicación de {{ usuario.username }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilo.css') }}">
+    <style>
+        body {
+            background: #f2f2f2;
+        }
+        .publicacion-container {
+            max-width: 600px;
+            margin: 40px auto 0 auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px #bbb;
+            padding: 32px 28px 24px 28px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .publicacion-container h2 {
+            margin-bottom: 18px;
+            color: #007bff;
+            font-size: 1.4em;
+        }
+        .publicacion-img {
+            max-width: 100%;
+            max-height: 380px;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            box-shadow: 0 1px 6px #ccc;
+            transition: box-shadow 0.3s, transform 0.3s;
+        }
+        .publicacion-img:hover {
+            box-shadow: 0 4px 24px #888;
+            transform: scale(1.03);
+            cursor: pointer;
+        }
+        .publicacion-desc {
+            font-size: 1.1em;
+            margin-bottom: 18px;
+            color: #333;
+            text-align: center;
+        }
+        .like-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        .like-icon-btn {
+            color: #bbb;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 2em;
+            transition: transform 0.1s, color 0.2s;
+            padding: 0;
+            margin: 0;
+        }
+        .like-icon-btn:hover {
+            transform: scale(1.15);
+            color: #e0245e !important;
+        }
+        .like-icon-btn.liked {
+            color: #e0245e;
+        }
+        .like-count {
+            font-size: 1.1em;
+            color: #333;
+            min-width: 30px;
+            text-align: left;
+        }
+        .comentarios-section {
+            width: 100%;
+            margin-bottom: 12px;
+        }
+        .comentarios-section h4 {
+            margin-bottom: 8px;
+            color: #444;
+        }
+        .comentarios-list {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 10px;
+            max-height: 160px;
+            overflow-y: auto;
+        }
+        .comentarios-list li {
+            background: #f8f9fa;
+            border-radius: 5px;
+            margin-bottom: 6px;
+            padding: 7px 10px;
+            font-size: 0.98em;
+        }
+        .comentario-autor {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .comentario-form {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+            max-width: 420px;
+            margin: 8px auto 0 auto;
+        }
+        .comentario-form input[type="text"] {
+            flex: 1;
+            min-width: 0;
+            max-width: 320px;
+            padding: 7px 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .comentario-form button {
+            background: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 7px 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .comentario-form button:hover {
+            background: #218838;
+        }
+        .volver-link {
+            display: block;
+            margin: 18px auto 0 auto;
+            text-align: center;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.2s;
+        }
+        .volver-link:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+        /* Estilos adicionales para la nueva sección */
+        .descripcion-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px #bbb;
+            padding: 24px;
+        }
+        .descripcion-container h5 {
+            margin-bottom: 16px;
+            color: #235390;
+            font-size: 1.3em;
+        }
+        .descripcion-container .card-text {
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 0;
+        }
+        .btn-editar-descripcion {
+            display: inline-block;
+            margin-top: 12px;
+            background: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-editar-descripcion:hover {
+            background: #0056b3;
+        }
+        .form-editar-descripcion {
+            display: none;
+            margin-top: 12px;
+        }
+        .form-editar-descripcion input {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: calc(100% - 18px);
+            margin-right: 8px;
+        }
+        .form-editar-descripcion button {
+            padding: 8px 16px;
+            border-radius: 5px;
+            border: none;
+            background: #28a745;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .form-editar-descripcion button:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="publicacion-container">
+        <h2>Publicación de {{ usuario.username }}</h2>
+        <img class="publicacion-img" src="{{ url_for('static', filename='fotos/' ~ foto.filename) }}" alt="Foto">
+        <div class="publicacion-desc">{{ foto.descripcion }}</div>
+
+        <!-- Botón de me gusta con corazón -->
+        <form method="post" class="like-section" style="margin-bottom: 10px;">
+            <button type="submit" name="like" value="1"
+                class="like-icon-btn {% if session['username'] in foto.likes %}liked{% endif %}"
+                title="Me gusta"
+                style="background:none; border:none; font-size:2em; color:inherit; padding:0; margin:0;">
+                {% if session['username'] in foto.likes %}
+                    ❤️
+                {% else %}
+                    🤍
+                {% endif %}
+            </button>
+            <span class="like-count">
+                {{ foto.likes|length if foto.likes else 0 }} Me gusta
+            </span>
+        </form>
+
+        <div class="comentarios-section">
+            <h4>Comentarios</h4>
+            <ul class="comentarios-list">
+                {% for comentario in foto.comentarios or [] %}
+                    <li>
+                        <span class="comentario-autor">
+                            @{{ comentario.usuario if comentario.usuario is defined else comentario.autor }}
+                        </span>: {{ comentario.texto }}
+                    </li>
+                {% else %}
+                    <li style="color:#888;">No hay comentarios aún.</li>
+                {% endfor %}
+            </ul>
+            <form method="post" action="{{ url_for('ver_publicacion', username=usuario.username, filename=foto.filename) }}" class="comentario-form">
+                <input type="text" name="comentario" placeholder="Escribe un comentario..." required>
+                <button type="submit" class="btn btn-success">Comentar</button>
+            </form>
+        </div>
+
+        <!-- Muestra la descripción de forma simple y centrada -->
+        <div class="publicacion-desc">{{ foto.descripcion }}</div>
+
+        <!-- Solo muestra el botón para editar si eres el dueño -->
+        {% if session['username'] == usuario.username %}
+            <div class="text-center mb-4 d-flex justify-content-center gap-2">
+                <button class="btn btn-outline-primary" type="button"
+                    onclick="document.getElementById('edit-desc-form').style.display='block'; this.style.display='none';">
+                    Editar descripción
+                </button>
+                <form method="post" action="{{ url_for('eliminar_publicacion', filename=foto.filename) }}" style="display:inline;">
+                    <button type="submit" class="btn btn-danger"
+                        onclick="return confirm('¿Estás seguro de que deseas eliminar esta publicación?');">
+                        Eliminar publicación
+                    </button>
+                </form>
+            </div>
+            <form id="edit-desc-form" method="post" action="{{ url_for('editar_descripcion', filename=foto.filename) }}"
+                  class="form-editar-descripcion" style="display:none;">
+                <div class="mb-3">
+                    <input type="text" name="nueva_descripcion" class="form-control"
+                           value="{{ foto.descripcion }}" maxlength="200" required>
+                </div>
+                <div class="d-flex justify-content-center gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm">Guardar</button>
+                    <button type="button" class="btn btn-link btn-sm"
+                            onclick="document.getElementById('edit-desc-form').style.display='none'; document.querySelector('button[onclick*=edit-desc-form]').style.display='inline-block';">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        {% endif %}
+
+        <a href="{{ url_for('ver_perfil', username=usuario.username) }}" class="volver-link">← Volver al perfil</a>
+    </div>
+</body>
+</html>

@@ -1,29 +1,232 @@
-{% extends 'base.html' %}
-{% block title %}Inicio{% endblock %}
-{% block content %}
-<div class="text-center">
-    <h2 class="mb-4">¡Bienvenido a tu red social!</h2>
-    <p>Aquí aparecerán las publicaciones de tus amigos y las tuyas.</p>
-    <a href="{{ url_for('perfil') }}" class="btn btn-primary">Ir a mi perfil</a>
-</div>
-<h1>Feed de Fotos</h1>
-{% for foto in fotos %}
-  <div style="margin-bottom: 32px;">
-    <img src="{{ url_for('static', filename='fotos/' + foto.filename) }}" width="300">
-    <p>{{ foto.descripcion }}</p>
-    <p>Autor: {{ foto.autor }}</p>
-    <form action="{{ url_for('comentar_foto', autor=foto.autor, filename=foto.filename) }}" method="post" style="margin-bottom: 8px;">
-      <input type="text" name="comentario" placeholder="Comenta algo..." required>
-      <button type="submit">Comentar</button>
-    </form>
-    <form action="{{ url_for('like_foto', autor=foto.autor, filename=foto.filename) }}" method="get" style="display:inline;">
-      <button type="submit">Me gusta ({{ foto.likes|length }})</button>
-    </form>
-    <ul>
-      {% for comentario in foto.comentarios %}
-        <li><b>{{ comentario.usuario }}:</b> {{ comentario.texto }}</li>
-      {% endfor %}
-    </ul>
-  </div>
-{% endfor %}
-{% endblock %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Feed</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilo.css') }}">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f2f2f2 60%, #e3eaff 100%);
+        }
+        .feed-container {
+            max-width: 700px;
+            margin: 40px auto 0 auto;
+        }
+        .publicacion-container {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px #bbb;
+            padding: 32px 28px 24px 28px;
+            margin-bottom: 38px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .publicacion-container:hover {
+            box-shadow: 0 8px 32px #aaa;
+            transform: translateY(-2px) scale(1.01);
+        }
+        .publicacion-container h2 {
+            margin-bottom: 10px;
+            color: #007bff;
+            font-size: 1.2em;
+            letter-spacing: 0.5px;
+        }
+        .publicacion-img {
+            max-width: 100%;
+            max-height: 320px;
+            border-radius: 12px;
+            margin-bottom: 14px;
+            box-shadow: 0 2px 10px #e3eaff;
+            object-fit: cover;
+            transition: box-shadow 0.3s, transform 0.3s;
+            background: #f8f9fa;
+        }
+        .publicacion-img:hover {
+            box-shadow: 0 8px 32px #b3c6ff;
+            transform: scale(1.03);
+            cursor: pointer;
+        }
+        .publicacion-desc {
+            font-size: 1.13em;
+            margin-bottom: 18px;
+            color: #333;
+            text-align: center;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        .like-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        .like-icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 2em;
+            color: #bbb;
+            transition: transform 0.1s, color 0.2s;
+            padding: 0;
+            margin: 0;
+        }
+        .like-icon-btn.liked {
+            color: #e0245e;
+            text-shadow: 0 2px 8px #f8d7da;
+        }
+        .like-icon-btn:hover {
+            transform: scale(1.15);
+            color: #e0245e;
+        }
+        .like-count {
+            font-size: 1.1em;
+            color: #333;
+            min-width: 30px;
+            text-align: left;
+        }
+        .comentarios-section {
+            width: 100%;
+            margin-bottom: 12px;
+        }
+        .comentarios-section h4 {
+            margin-bottom: 8px;
+            color: #444;
+            font-size: 1em;
+        }
+        .comentarios-list {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 10px;
+            max-height: 80px;
+            overflow-y: auto;
+        }
+        .comentarios-list li {
+            background: #f8f9fa;
+            border-radius: 5px;
+            margin-bottom: 6px;
+            padding: 7px 10px;
+            font-size: 0.98em;
+        }
+        .comentario-autor {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .ver-publicacion-link {
+            display: block;
+            margin: 10px auto 0 auto;
+            text-align: center;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.2s;
+        }
+        .ver-publicacion-link:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+        /* Estilos para la sección de mensajería */
+        .mensajeria-container {
+            display: none;
+        }
+        @media (min-width: 768px) {
+            .mensajeria-container {
+                display: block;
+                position: absolute;
+                top: 60px;
+                right: 20px;
+                width: 300px;
+                z-index: 1000;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include 'navbar.html' %}
+    {% extends "base.html" %}
+
+    {% block content %}
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <!-- Columna principal: Feed -->
+            <div class="col-12 col-md-8 col-lg-8">
+                <div class="feed-container">
+                    {% for publicacion in publicaciones %}
+                    <div class="publicacion-container">
+                        <div>
+                            <img src="{{ url_for('static', filename='avatars/' ~ (publicacion.usuario.avatar if publicacion.usuario.avatar else 'default.png')) }}" class="rounded-circle" style="width:40px; height:40px;">
+                            <span class="fw-bold">{{ publicacion.usuario.datos_personales.nombre }}</span>
+                            <span class="text-muted">@{{ publicacion.usuario.username }}</span>
+                        </div>
+                        <img src="{{ url_for('static', filename='fotos/' ~ publicacion.foto.filename) }}" class="publicacion-img mt-2">
+                        <div class="mt-2">{{ publicacion.foto.descripcion }}</div>
+                        <!-- Like -->
+                        <form method="get" action="{{ url_for('like_foto', autor=publicacion.usuario.username, filename=publicacion.foto.filename) }}" class="like-section" style="margin-bottom: 10px;">
+                            <button type="submit" class="like-icon-btn {% if session['username'] in publicacion.foto.likes %}liked{% endif %}" title="Me gusta">
+                                {% if session['username'] in publicacion.foto.likes %}
+                                    ❤️
+                                {% else %}
+                                    🤍
+                                {% endif %}
+                            </button>
+                            <span class="like-count">
+                                {{ publicacion.foto.likes|length if publicacion.foto.likes else 0 }} Me gusta
+                            </span>
+                        </form>
+                        <!-- Comentarios -->
+                        <div class="comentarios-section">
+                            <h4>Comentarios</h4>
+                            <ul class="comentarios-list">
+                                {% for comentario in publicacion.foto.comentarios or [] %}
+                                    <li>
+            <span class="comentario-autor">
+                @{{ comentario.usuario if comentario.usuario is defined else comentario.autor }}
+            </span>: {{ comentario.texto }}
+        </li>
+                                {% else %}
+                                    <li style="color:#888;">No hay comentarios aún.</li>
+                                {% endfor %}
+                            </ul>
+                            <form method="post" action="{{ url_for('comentar_foto', autor=publicacion.usuario.username, filename=publicacion.foto.filename) }}">
+                                <input type="text" name="comentario" placeholder="Escribe un comentario..." required>
+                                <button type="submit">Comentar</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% else %}
+                        <p style="text-align:center; color:#888;">No hay publicaciones en tu feed.</p>
+                    {% endfor %}
+                </div>
+            </div>
+            <!-- Columna lateral: Mensajería -->
+            <div class="d-none d-md-block col-md-4 col-lg-4">
+                <div class="position-sticky" style="top: 90px;">
+                    <div class="card shadow-sm mb-4" style="border-radius: 14px;">
+                        <div class="card-body">
+                            <h5 class="mb-3" style="color:#235390;">Mensajería</h5>
+                            {% if conversaciones %}
+                                <div class="list-group">
+                                    {% for chat in conversaciones %}
+                                        <a href="{{ url_for('mensajes', username=chat.username) }}" class="list-group-item list-group-item-action d-flex align-items-center gap-2" style="border-radius: 8px;">
+                                            <img src="{{ url_for('static', filename='avatars/' ~ (chat.avatar if chat.avatar else 'default.png')) }}"
+                                                 alt="Avatar"
+                                                 class="rounded-circle"
+                                                 style="width: 38px; height: 38px; object-fit: cover; border: 2px solid #e3eaff;">
+                                            <div>
+                                                <div class="fw-bold" style="font-size:1em;">{{ chat.datos_personales.nombre }}</div>
+                                                <div class="text-muted" style="font-size:0.9em;">@{{ chat.username }}</div>
+                                            </div>
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-muted text-center">No tienes chats aún.</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+</body>
+</html>
